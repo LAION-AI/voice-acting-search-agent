@@ -1,0 +1,81 @@
+# 4-GPU node (Jupiter topology): GPU0 serves the LLM for all workers,
+# GPU1-3 each run one TTS+scorer agent worker pointing at the shared LLM.
+#
+# Launch pattern (see slurm/jupiter.sbatch):
+#   CUDA_VISIBLE_DEVICES=0 <vllm_python> -m vllm.entrypoints.openai.api_server \
+#       --model <llm.model> --port 8801 --gpu-memory-utilization 0.90 --max-model-len 32768
+#   for g in 1 2 3: CUDA_VISIBLE_DEVICES=$g python run_agent.py --config configs/node_4gpu.yaml \
+#       --gpu $g --mission "<mission $g>" --no-start-llm
+
+gpu: 1                      # per-worker override via run_agent.py --gpu
+
+models:
+  tts: laion/moss-tts-local-transformer-4.55b-voice-acting-v2
+  codec: OpenMOSS-Team/MOSS-Audio-Tokenizer-v2
+  n_vq: 12
+
+llm:
+  model: google/gemma-4-12B-it-qat-w4a16-ct
+  base_url: http://127.0.0.1:8801/v1
+  port: 8801
+  gpu_memory_utilization: 0.90    # dedicated LLM GPU on the 4-GPU node
+  max_model_len: 65536
+  vllm_python: /home/deployer/miniconda3/bin/python
+  temperature: 0.7
+  max_tokens: 2048
+
+paths:
+  vb_dataset: /run/user/1001/vb_dataset
+  score_layout: /run/user/1001/vb_dataset/score_layout.filled.json
+  vn_dim_names: /tmp/vn_dim_names.json
+  emo_loras: /tmp/emo_loras_v3
+  vn_loras: /tmp/vn_loras3_flat
+  char_lora_cache: /tmp/char_loras
+  pvc_repo: /run/user/1001/vaa_build/procedural-voice-captions
+  refs_dir: /tmp/evc_refs
+  manual_emo_entries: /tmp/manual/entries_emo.json
+  manual_emo_tips: /tmp/manual/tips_emo.json
+  manual_vn_entries: /tmp/vn_manual/entries.json
+  edge_evo_dir: /tmp/edge_evo
+  evo_all_dir: /tmp/evo_all
+
+hf:
+  char_repo_genuine: TTS-AGI/moss-character-loras-genuine
+  char_repo_refined: TTS-AGI/moss-character-loras-refined
+  vn_lora_repo: laion/moss-voicenet-dimension-loras
+
+manuals:
+  emo_raw_base: https://raw.githubusercontent.com/LAION-AI/moss-voiceacting-manual/main/md/
+  vn_raw_base: https://raw.githubusercontent.com/LAION-AI/moss-voicenet-manual/main/md/
+
+asr:
+  backend: auto
+  whisper_model: small
+  variants:
+    - {beam_size: 5}
+    - {beam_size: 1}
+    - {beam_size: 1, temperature: 0.2}
+
+generation:
+  max_frames: 384
+  ref:    {temp: 0.9, top_p: 0.9, top_k: 50}
+  no_ref: {temp: 1.0, top_p: 0.95, top_k: 25}
+  batch_chunk: 8
+
+agent:
+  budget_tool_calls: 60
+  max_context_tokens: 52000
+  max_json_retries: 3
+  tool_result_char_cap: 6000
+  subagent_default_budget: 15
+
+evolution:
+  generations: 10
+  population: 8
+  samples_per_genome: 8
+  keep_top: 2
+  mutate: 4
+  fresh: 2
+
+repo:
+  url: https://github.com/LAION-AI/voice-acting-search-agent

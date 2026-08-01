@@ -1,0 +1,82 @@
+# Single A100-80GB configuration: vLLM brain + TTS + full scorer stack co-resident.
+# All absolute paths live HERE (and in node_4gpu.yaml) — modules never hardcode them.
+
+gpu: 1                      # CUDA_VISIBLE_DEVICES value used by run_agent.py
+
+models:
+  tts: laion/moss-tts-local-transformer-4.55b-voice-acting-v2
+  codec: OpenMOSS-Team/MOSS-Audio-Tokenizer-v2
+  n_vq: 12
+
+llm:
+  model: google/gemma-4-12B-it-qat-w4a16-ct   # official Google QAT w4a16 (compressed-tensors), vLLM-native
+  base_url: http://127.0.0.1:8801/v1
+  port: 8801
+  gpu_memory_utilization: 0.22                # leaves ~62GB for TTS + scorers on the same GPU
+  max_model_len: 65536
+  vllm_python: /home/deployer/miniconda3/bin/python   # env that has vLLM installed
+  temperature: 0.7
+  max_tokens: 2048
+
+paths:
+  # reference scorer code (va_rescore.py NinetyNineScorer, spk_sim.py, score_layout.filled.json)
+  vb_dataset: /run/user/1001/vb_dataset
+  score_layout: /run/user/1001/vb_dataset/score_layout.filled.json
+  vn_dim_names: /tmp/vn_dim_names.json
+  # LoRA catalogs
+  emo_loras: /tmp/emo_loras_v3                # 40 emotion v3 LoRAs, one dir per emotion
+  vn_loras: /tmp/vn_loras3_flat               # 114 = 57 dims x {high,low}, dirs vn_<DIM>__<high|low>
+  char_lora_cache: /tmp/char_loras            # lazy per-character HF downloads land here
+  # procedural captions repo (clone of LAION-AI/procedural-voice-captions @ latest)
+  pvc_repo: /run/user/1001/vaa_build/procedural-voice-captions
+  # reference voices
+  refs_dir: /tmp/evc_refs
+  # local manual mirrors (fetch_manual refreshes from GitHub raw; these are the offline fallback)
+  manual_emo_entries: /tmp/manual/entries_emo.json
+  manual_emo_tips: /tmp/manual/tips_emo.json
+  manual_vn_entries: /tmp/vn_manual/entries.json
+  edge_evo_dir: /tmp/edge_evo
+  evo_all_dir: /tmp/evo_all
+
+hf:
+  char_repo_genuine: TTS-AGI/moss-character-loras-genuine
+  char_repo_refined: TTS-AGI/moss-character-loras-refined
+  vn_lora_repo: laion/moss-voicenet-dimension-loras
+
+manuals:
+  emo_raw_base: https://raw.githubusercontent.com/LAION-AI/moss-voiceacting-manual/main/md/
+  vn_raw_base: https://raw.githubusercontent.com/LAION-AI/moss-voicenet-manual/main/md/
+
+asr:
+  backend: auto               # try parakeet (nemo), degrade to faster-whisper
+  whisper_model: small
+  # three decode variants for majority/mean WER
+  variants:
+    - {beam_size: 5}
+    - {beam_size: 1}
+    - {beam_size: 1, temperature: 0.2}
+
+generation:
+  max_frames: 384             # ~30s at 12.5 fps
+  # prompting best practice defaults (see context/system_context.md)
+  ref:    {temp: 0.9, top_p: 0.9, top_k: 50}
+  no_ref: {temp: 1.0, top_p: 0.95, top_k: 25}
+  batch_chunk: 8              # generate() batches candidates in chunks of this size
+
+agent:
+  budget_tool_calls: 60
+  max_context_tokens: 52000   # transcript compression threshold (approx, chars/4)
+  max_json_retries: 3
+  tool_result_char_cap: 6000
+  subagent_default_budget: 15
+
+evolution:
+  generations: 10
+  population: 8
+  samples_per_genome: 8       # mean-of-8 fitness
+  keep_top: 2
+  mutate: 4
+  fresh: 2
+
+repo:
+  url: https://github.com/LAION-AI/voice-acting-search-agent
