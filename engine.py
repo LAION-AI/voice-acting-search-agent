@@ -298,6 +298,11 @@ class Engine:
                     continue
                 wav = msg.audio_codes_list[0]
                 w = wav.cpu().float().numpy() if hasattr(wav, "cpu") else np.asarray(wav)
+                # CRITICAL: the codec returns stereo (2,N) (or (N,2)); a bare reshape(-1)
+                # CONCATENATES the two identical channels in time -> every sample doubled.
+                # Channel-average instead (matches the reference mp3b64 pattern).
+                if w.ndim > 1:
+                    w = w.mean(0) if w.shape[0] < w.shape[-1] else w.mean(-1)
                 w = w.reshape(-1)
                 if w.size < self.sr * 0.4:  # <0.4s = degenerate
                     continue

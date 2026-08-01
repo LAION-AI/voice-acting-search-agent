@@ -1,5 +1,7 @@
 # Benchmark: maximize AROU + VALN + EXPL + S_STRY
 
+> KNOWN ISSUE (post-hoc): all audio artifacts and stats of THIS run were produced before the channel-flatten fix — every sample contains its content twice, durations are 2x, and any WER numbers are saturated; 99-vec scores shift by <=0.06 per code when computed on the true (deduplicated) takes. See README 'Known issues'.
+
 > Provenance: the autonomous search ran 12 generations (gens 0-11, `evolution_log_search.jsonl` + `transcript_search.jsonl`) before the worker process was externally killed; a short resume run (`transcript.jsonl`) re-confirmed the top-3 genomes (gen 12 in the table), saved the hall of fame and wrote the final report. The winning genome was re-validated with fresh mean-of-8 sampling; the agent additionally applied the new lazy `sidon_enhance` tool to the winner (GENU 0.191->0.264, BLEND 0.205->0.327).
 
 Constraints: GENU >= no-LoRA baseline, BLEND >= no-LoRA baseline (penalty-weighted). Fitness = mean of the four target slots (mean-of-8 samples per genome) minus constraint penalties.

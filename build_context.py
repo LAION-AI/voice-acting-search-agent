@@ -83,8 +83,9 @@ def sec_prompting():
   not required. Combine: moderate LoRA (0.75-1.25) + evolved prompt is the usual winner.
 - Raising several targets at once: prefer one strong driver LoRA + small helpers, not
   many at full scale; merged scales add up in effect and quickly destroy intelligibility.
-- The model sometimes speaks the text TWICE in one sample (transcribe shows the text
-  duplicated, WER ~1.0). Counter it with max_frames ~= 25 + 5*word_count (12.5 frames/s).
+- Duration sanity: the codec runs at 12.5 frames/s, so a sample can never exceed
+  max_frames/12.5 seconds; ~3 words/s is normal speech. If transcribe shows the text
+  spoken twice, treat it as a bug and report it, not as a sampling quirk.
 """
 
 

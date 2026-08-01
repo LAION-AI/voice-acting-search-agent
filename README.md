@@ -162,3 +162,15 @@ and the LoRA catalogs (`laion/moss-voicenet-dimension-loras`,
 - `results/canary/` — three bring-up canary missions (transcripts + scores, audio-b64 stripped)
 - `results/benchmark_arou_valn_expl_stry/` — 10×8 evolution benchmark (RESULTS.md,
   hall-of-fame wavs + genomes, fitness trajectory)
+
+## Known issues (historical)
+
+- **Pre-2026-08-01 artifacts contain doubled audio.** A channel-flatten bug in
+  `engine.py` (codec stereo output concatenated by `reshape(-1)` instead of
+  channel-averaged) made every generated sample contain its content twice
+  back-to-back. All run artifacts committed before the fix (canaries,
+  `results/benchmark_arou_valn_expl_stry/`) have 2x durations, ASR transcripts with
+  the text twice (WER saturated to ~1.0), and 99-vec scores computed on doubled
+  audio (measured shift on the affected cohort: |mean delta| <= 0.06 per code — rankings
+  largely unaffected, absolute values slightly off). Guarded by
+  `scripts/test_no_doubling.py` since the fix.
