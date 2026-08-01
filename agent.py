@@ -163,6 +163,14 @@ class Agent:
 
             self.messages.append({"role": "assistant", "content": json.dumps(call)})
             if tool == "finish":
+                hof = os.path.join(self.ctx.workdir, "hall_of_fame")
+                if (self.ctx.samples and not getattr(self, "_hof_nudged", False)
+                        and os.path.isdir(hof) and not os.listdir(hof)):
+                    self._hof_nudged = True
+                    self.messages.append({"role": "user", "content":
+                        "Before finishing: persist your best samples with save_best "
+                        "(the hall of fame is still empty), then call finish again."})
+                    continue
                 report = str(args.get("report", ""))
                 self.log("finish", {"report": report})
                 break
