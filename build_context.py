@@ -246,7 +246,8 @@ def main():
     args = ap.parse_args()
     cfg = yaml.safe_load(open(args.config))
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from tools import tool_docs
+    from tools import tool_docs, register_manifest_tools
+    register_manifest_tools(cfg)   # manifest entries (registry/tools.json) included in docs
     info = build(cfg, tool_docs(), args.out)
     print(f"[context] wrote {info['path']}  ~{info['tokens']} tokens ({info['chars']} chars)")
 

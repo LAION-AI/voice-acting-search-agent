@@ -1,0 +1,23 @@
+[
+  {
+    "name": "sidon_enhance",
+    "module": "tools_ext.sidon",
+    "vram_gb": 1.5,
+    "lifecycle": "lazy",
+    "ttl_s": 300,
+    "doc": "Restore/denoise samples with Sidon v0.1 speech restoration (output 48kHz). Cleans noisy winners before final scoring/delivery. Returns NEW sample_ids (originals kept); re-score the new samples.",
+    "params": {"sample_ids": {"type": "list", "required": true}},
+    "requires": ["sarulab-speech/sidon-v0.1", "facebook/w2v-bert-2.0"]
+  },
+  {
+    "name": "audio_stretch",
+    "module": "tools_ext.stretch",
+    "vram_gb": 0.0,
+    "lifecycle": "lazy",
+    "ttl_s": 300,
+    "doc": "Time-stretch samples WITHOUT pitch change (audiostretchy). ratio 0.25-4.0 (>1 = slower/longer). For pacing/dramatic-tempo experiments. Returns NEW sample_ids; re-score them.",
+    "params": {"sample_ids": {"type": "list", "required": true},
+               "ratio": {"type": "float", "required": true}},
+    "requires": ["pip:audiostretchy"]
+  }
+]

@@ -71,7 +71,7 @@ def main():
     # ---- heavy stack ----
     from engine import Engine
     from scorers import ScorerStack
-    from tools import ToolContext, tool_docs
+    from tools import ToolContext, tool_docs, register_manifest_tools
     import build_context as BC
     from agent import Agent
 
@@ -81,6 +81,7 @@ def main():
     print(f"[run] engine+scorers loaded in {time.time()-t0:.0f}s "
           f"(torch alloc {engine.gpu_memory_gb()} GB)", flush=True)
 
+    register_manifest_tools(cfg)   # manifest tools (registry/tools.json) before docs render
     ctx_path = os.path.join(here, "context/system_context.md")
     if args.rebuild_context or not os.path.exists(ctx_path):
         info = BC.build(cfg, tool_docs(), ctx_path)

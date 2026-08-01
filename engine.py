@@ -30,6 +30,62 @@ def _san(name):
     return re.sub(r"[^A-Za-z0-9_-]", "_", name)[:48]
 
 
+class ToolModelPool:
+    """Lazy tool-model lifecycle (SWARM_PLAN §6): models load on FIRST call, stay
+    warm, auto-unload after ttl_s idle (background sweeper), and a hard VRAM budget
+    is enforced with LRU eviction. Nothing here loads at startup."""
+
+    def __init__(self, vram_budget_gb=6.0, sweep_interval_s=30):
+        import threading
+        self.vram_budget_gb = float(vram_budget_gb)
+        self._entries = {}   # name -> {obj, vram_gb, ttl_s, last_used}
+        self._lock = threading.Lock()
+        self._sweeper = threading.Thread(
+            target=self._sweep_loop, args=(sweep_interval_s,), daemon=True)
+        self._sweeper.start()
+
+    def get(self, name, loader, vram_gb, ttl_s=300):
+        """Return the model object for `name`, loading via `loader()` on first use."""
+        import time as _t
+        with self._lock:
+            e = self._entries.get(name)
+            if e is not None:
+                e["last_used"] = _t.time()
+                return e["obj"]
+            # LRU-evict until the new model fits the budget
+            used = sum(x["vram_gb"] for x in self._entries.values())
+            while self._entries and used + float(vram_gb) > self.vram_budget_gb:
+                lru = min(self._entries, key=lambda k: self._entries[k]["last_used"])
+                used -= self._entries[lru]["vram_gb"]
+                self._unload(lru)
+        obj = loader()  # outside the lock: loading can be slow
+        with self._lock:
+            self._entries[name] = {"obj": obj, "vram_gb": float(vram_gb),
+                                   "ttl_s": float(ttl_s), "last_used": _t.time()}
+        return obj
+
+    def _unload(self, name):
+        self._entries.pop(name, None)
+        try:
+            torch.cuda.empty_cache()
+        except Exception:
+            pass
+
+    def _sweep_loop(self, interval):
+        import time as _t
+        while True:
+            _t.sleep(interval)
+            now = _t.time()
+            with self._lock:
+                for name in [n for n, e in self._entries.items()
+                             if now - e["last_used"] > e["ttl_s"]]:
+                    self._unload(name)
+
+    def status(self):
+        return {n: {"vram_gb": e["vram_gb"], "idle_s": round(__import__("time").time() - e["last_used"], 1)}
+                for n, e in self._entries.items()}
+
+
 class Engine:
     def __init__(self, cfg, device="cuda"):
         self.cfg = cfg

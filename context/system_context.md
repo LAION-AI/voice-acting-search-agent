@@ -67,6 +67,12 @@ git add+commit+push a results path inside the agent repo (GITHUB_TOKEN env).
 ### finish(report: str)
 End the mission with a final report: {report: '...'}.
 
+### sidon_enhance(sample_ids: list)
+Restore/denoise samples with Sidon v0.1 speech restoration (output 48kHz). Cleans noisy winners before final scoring/delivery. Returns NEW sample_ids (originals kept); re-score the new samples. [lazy: loads on first call, ~1.5GB VRAM, auto-unloads after 300s idle]
+
+### audio_stretch(sample_ids: list, ratio: float)
+Time-stretch samples WITHOUT pitch change (audiostretchy). ratio 0.25-4.0 (>1 = slower/longer). For pacing/dramatic-tempo experiments. Returns NEW sample_ids; re-score them. [lazy: loads on first call, ~0.0GB VRAM, auto-unloads after 300s idle]
+
 ## Prompting best practices (measured, follow unless experimenting)
 - Conditioning format: `instruction` = voice-acting caption:
   `GENERAL: <voice description>\nSCRIPT:\n(<delivery cue>)` ; `text` = the words spoken.

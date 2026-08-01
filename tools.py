@@ -32,13 +32,18 @@ class ToolContext:
         self.memory_path = f"{workdir}/memory.md"
         self.spawn_fn = None  # injected by agent.py
         self.context_refresh_fn = None  # injected by run_agent.py (rebuild system context)
+        # lazy tool-model pool (SWARM_PLAN §6) + manifest-driven extension tools
+        from engine import ToolModelPool
+        self.pool = ToolModelPool(vram_budget_gb=float(
+            cfg.get("tool_pool", {}).get("vram_budget_gb", 6.0)))
+        register_manifest_tools(cfg)
 
     # ---------------- samples
-    def add_sample(self, wav, dur, meta):
+    def add_sample(self, wav, dur, meta, sr=None):
         self._nsample += 1
         sid = f"s{self._nsample:04d}"
         path = f"{self.workdir}/samples/{sid}.wav"
-        sf.write(path, wav.reshape(-1, 1), self.engine.sr)
+        sf.write(path, wav.reshape(-1, 1), int(sr or self.engine.sr))
         self.samples[sid] = {"path": path, "dur": dur, "scores": None, **meta}
         return sid
 
@@ -583,6 +588,51 @@ TOOLS = {
         "params": {"report": {"type": str, "required": True}},
     },
 }
+
+
+# ============================================================== manifest tools
+_TYPE_MAP = {"str": str, "int": int, "float": float, "list": list, "dict": dict,
+             "bool": bool}
+_MANIFEST_LOADED = False
+
+
+def register_manifest_tools(cfg=None):
+    """Load registry/tools.json and register each entry as a dispatchable tool
+    (SWARM_PLAN §6 auto-discovery). Idempotent; adding a tool is a data change."""
+    global _MANIFEST_LOADED
+    if _MANIFEST_LOADED:
+        return list(TOOLS)
+    import importlib
+    here = os.path.dirname(os.path.abspath(__file__))
+    manifest_path = os.path.join(
+        (cfg or {}).get("repo_dir", here), "registry", "tools.json")
+    if not os.path.exists(manifest_path):
+        manifest_path = os.path.join(here, "registry", "tools.json")
+    if not os.path.exists(manifest_path):
+        return list(TOOLS)
+    for entry in json.load(open(manifest_path)):
+        name = entry["name"]
+        if name in TOOLS:
+            continue
+        try:
+            mod = importlib.import_module(entry["module"])
+        except Exception as ex:  # missing dep -> tool simply not offered
+            print(f"[tools] manifest tool {name} unavailable: {str(ex)[:120]}")
+            continue
+        params = {k: {"type": _TYPE_MAP.get(v.get("type", "str"), str),
+                      "required": bool(v.get("required"))}
+                  for k, v in entry.get("params", {}).items()}
+        lifecycle = entry.get("lifecycle", "lazy")
+        doc = (f"{entry['doc']} [{lifecycle}: loads on first call, "
+               f"~{entry.get('vram_gb', 0)}GB VRAM, auto-unloads after "
+               f"{entry.get('ttl_s', 300)}s idle]")
+        TOOLS[name] = {
+            "fn": (lambda m: lambda ctx, **kw: m.run(ctx, **kw))(mod),
+            "desc": doc,
+            "params": params,
+        }
+    _MANIFEST_LOADED = True
+    return list(TOOLS)
 
 
 def validate_args(tool, args):

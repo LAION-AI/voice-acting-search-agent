@@ -83,6 +83,14 @@ registry in `tools.py`. Summary:
 | `fetch_manual` | re-pull live manuals → rebuild the system context; or fetch one entry |
 | `push_results` | commit+push results to this repo |
 | `finish` | end the mission with a final report |
+| `sidon_enhance`* | speech restoration (Sidon v0.1, 48 kHz out) — clean noisy winners; returns new sample_ids |
+| `audio_stretch`* | time-stretch 0.25-4.0x without pitch change (audiostretchy) — pacing experiments |
+
+\* manifest-driven **lazy** tools (`registry/tools.json`, SWARM_PLAN §6): never loaded at
+startup — `engine.ToolModelPool` loads them on first call, keeps them warm, auto-unloads
+after 300 s idle, and LRU-evicts under a hard VRAM budget. Adding a tool is a data
+change: drop a module in `tools_ext/` + one manifest entry; `tools.py` dispatches and
+`build_context.py` renders its docs automatically.
 
 ## How to run (fresh A100 node, only HF + GH tokens needed)
 
