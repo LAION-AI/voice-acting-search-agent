@@ -101,8 +101,15 @@ class Engine:
         emotion:  '<Emotion>'                    (e.g. 'Fear')
         voicenet: 'vn_<DIM>_<high|low>'          (e.g. 'vn_AROU_high')
         character:'char_genuine/<n>' | 'char_refined/<n>'  (lazy HF download)
+        Emotion names match case-insensitively and tolerate an 'emotion_' prefix.
         """
         p = self.cfg["paths"]
+        if not name.startswith(("vn_", "char_")):
+            key = re.sub(r"^emotion[_/]", "", name.strip(), flags=re.I).lower()
+            by_lower = {e.lower(): e for e in EMOTIONS}
+            by_lower.update({e.lower(): e for e in self.emotion_lora_names()})
+            if key in by_lower:
+                name = by_lower[key]
         if name in EMOTIONS or os.path.isdir(os.path.join(p["emo_loras"], name)):
             d = os.path.join(p["emo_loras"], name)
             if os.path.exists(f"{d}/adapter_config.json"):
@@ -137,7 +144,8 @@ class Engine:
                     raise FileNotFoundError(f"could not download character LoRA {name}")
             return local
         raise FileNotFoundError(
-            f"unknown LoRA '{name}' (expected an emotion name, vn_<DIM>_<high|low>, "
+            f"unknown LoRA '{name}' (expected an emotion name exactly as listed by "
+            f"list_loras family='emotion' e.g. 'Elation', 'Triumph'; or vn_<DIM>_<high|low>; "
             f"or char_genuine/<name> | char_refined/<name>)")
 
     # ------------------------------------------------------------- merging
