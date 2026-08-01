@@ -1,0 +1,138 @@
+<!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
+<title>Voice-Acting Search Agent — Phase-C Canary Results</title><style>
+:root{--bg:#0d0f14;--panel:#161a22;--bd:#2a3040;--tx:#e6e9f0;--mut:#98a2b8;--acc:#7c9cff;--a2:#f0a35e;--ok:#5ec2a3}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif}
+a{color:var(--acc)}.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
+h1{font-size:26px;margin:0 0 6px}h2{font-size:19px;margin:0 0 4px}
+.sub0{color:var(--mut);font-size:14px;margin:0 0 8px}
+.hero{background:linear-gradient(135deg,#1a1f2e,#141824);border:1px solid var(--bd);border-radius:16px;padding:24px;margin:0 0 24px}
+.hero code{background:#0c0e13;border:1px solid var(--bd);border-radius:5px;padding:1px 5px;font-size:12px}
+.lead{color:var(--mut);font-size:13.5px;margin:0 0 12px}
+.calls{color:var(--ok);font-size:12px}
+.sec{margin:30px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:14px}
+.card.sub{opacity:.88}.card.refc{border-color:#3a4a6a}
+.chip{font-size:11.5px;color:var(--a2);margin-bottom:8px}
+audio{width:100%;height:34px}
+.meta{font-size:12px;color:#c7cdda;margin-top:8px;line-height:1.55}
+.note{font-size:11.5px;color:var(--mut);margin-top:6px;font-style:italic}
+details{margin-top:8px;font-size:12px}summary{cursor:pointer;color:var(--acc)}
+pre{white-space:pre-wrap;background:#0c0e13;border:1px solid var(--bd);border-radius:8px;padding:10px;font-size:11.5px;color:#c7cdda;max-height:340px;overflow:auto}
+.txt{font-size:11.5px;color:var(--mut);font-style:italic;margin-top:4px}
+.repd{margin-top:12px}
+.foot{color:var(--mut);font-size:12px;margin-top:36px}
+</style></head><body><div class=wrap>
+<div class=hero><h1>Voice-Acting Search Agent — Phase-C Canary Results</h1>
+<p class=sub0>An <b>autonomous agent</b> (Gemma-4-12B QAT on vLLM, 38k-token conditioning manual in context, 12-tool API) running
+on a single A100-80GB alongside <code>MOSS-VA-v2</code> + the full scorer stack. Three canary missions, each solved
+end-to-end without human help: pick LoRAs + scales, write the prompt, generate batches of 8, score (EmoNet-40 ·
+VoiceNet-57 · genuineness · burst-blend · speaker-sim · WER), iterate, save the best.</p>
+<p class=sub0>Repo: <a href="https://github.com/LAION-AI/voice-acting-search-agent">LAION-AI/voice-acting-search-agent</a> ·
+raw artifacts in <code>results/canary/</code>. Key emergent behavior: the agent discovered on its own that VoiceNet doses ≥1.0
+maximize the target but destroy speaker identity, and self-corrected to 0.4–0.5.</p></div>
+<div class=sec><h2>Raise Arousal on a cloned reference</h2><p class=lead>Make reference voice <b>ref1</b> express strongly raised Arousal (AROU) while staying recognizably the same speaker. <span class=calls>11 tool calls, fully autonomous.</span></p>
+<div class=grid><div class="card refc"><div class=chip>🎙️ neutral reference (input)</div>
+<audio controls preload=none src="audio/ref1.mp3"></audio>
+<div class=meta>The cloned speaker the agent had to preserve (ECAPA speaker-sim checked).</div></div><div class=card><div class=chip>🏆 hall of fame · s0078 · 10.56s</div>
+<audio controls preload=none src="audio/arousal_ref_s0078.mp3"></audio>
+<div class=meta><b>LoRAs:</b> vn_ATCK_high@0.5 + vn_AROU_high@0.4<br><b>Sampling:</b> temp 0.8 · top_p 0.9 · top_k 40<br><b>Scores:</b> GENU 0.0 · BLEND 0.0 · QUALITY 0.515</div>
+<div class=note>Best balance of Arousal (0.585) and Speaker Similarity (0.539) using hybrid vn_ATCK_high (0.5) and vn_AROU_high (0.4).</div>
+<details><summary>prompt & text</summary><pre>GENERAL: A voice vibrating with physical adrenaline, intense and grounded.
+SCRIPT:
+(with a voice physically vibrating with adrenaline, intense and grounded)</pre><div class=txt>“The atmosphere was heavy with anticipation as we stood on the precipice of a new era, waiting for the first light of dawn to break the horizon.”</div></details></div><div class="card sub"><div class=chip>🧬 explore round 1 · best of 8 · fitness 0.89</div>
+<audio controls preload=none src="audio/arousal_ref_evo0_s0011.mp3"></audio>
+<div class=meta><b>LoRAs:</b> vn_AROU_high@1.0</div></div><div class="card sub"><div class=chip>🧬 explore round 3 · best of 8 · fitness 0.56</div>
+<audio controls preload=none src="audio/arousal_ref_evo2_s0051.mp3"></audio>
+<div class=meta><b>LoRAs:</b> vn_AROU_high@0.6 + vn_ATCK_high@0.7</div></div><div class="card sub"><div class=chip>🧬 explore round 4 · best of 8 · fitness 0.56</div>
+<audio controls preload=none src="audio/arousal_ref_evo3_s0078.mp3"></audio>
+<div class=meta><b>LoRAs:</b> vn_ATCK_high@0.5 + vn_AROU_high@0.4</div></div><div class="card sub"><div class=chip>🧬 explore round 5 · best of 8 · fitness 0.61</div>
+<audio controls preload=none src="audio/arousal_ref_evo4_s0099.mp3"></audio>
+<div class=meta><b>LoRAs:</b> vn_ATCK_high@0.4 + vn_AROU_high@0.4</div></div></div>
+<details class=repd><summary>agent's final mission report</summary><pre>The mission to raise Arousal (AROU) for &#x27;ref1&#x27; while maintaining speaker identity was successful. 
+
+**Winning Recipe:**
+- **LoRAs &amp; Scales:** `vn_ATCK_high` (0.5), `vn_AROU_high` (0.4)
+- **Prompt:** &quot;A voice vibrating with physical adrenaline, intense and grounded.&quot;
+- **Delivery Cue:** &quot;(with a voice physically vibrating with adrenaline, intense and grounded)&quot;
+- **Sampling:** temp 0.8, top_p 0.9, top_k 40
+
+**Key Metrics:**
+- **Baseline AROU:** 0.458
+- **Target AROU:** 0.585
+- **Speaker Similarity:** 0.539 (Retained identity well)
+- **Quality:** 0.538
+
+**Analysis:** 
+High-dose LoRAs (1.0x+) successfully pushed Arousal to 0.64+ but caused significant speaker drift (Similarity &lt; 0.45) and destroyed Genuineness. The winning hybrid strategy (0.4-0.5x scales) provided a substantial, audible lift in Arousal while preserving the cinematic, deep-toned character of &#x27;ref1&#x27; with a much higher similarity score (0.539).</pre></details></div><div class=sec><h2>Evil ghost voice (no reference)</h2><p class=lead>Create a convincing evil ghost: spectral, hollow, menacing, whispery yet threatening — free choice of character/emotion/VoiceNet LoRAs. <span class=calls>14 tool calls, fully autonomous.</span></p>
+<div class=grid><div class=card><div class=chip>🏆 hall of fame · s0005 · 36.8s</div>
+<audio controls preload=none src="audio/evil_ghost_s0005.mp3"></audio>
+<div class=meta><b>LoRAs:</b> char_genuine/undead@1.0 + Malevolence_Malice@1.0 + Emotional_Numbness@0.8 + vn_S_WHIS_high@1.0 + vn_TENS_high@0.8<br><b>Sampling:</b> temp 1.0 · top_p 0.95 · top_k 40<br><b>Scores:</b> GENU 0.186 · BLEND 0.171 · QUALITY 0.356</div>
+<div class=note>Winning &#x27;Evil Ghost&#x27; recipe: char_genuine/undead + Malevolence_Malice (1.0) + Emotional_Numbness (0.8) + vn_S_WHIS_high (1.0) + vn_TENS_high (0.8). High Malice (2.14) and Whisper (0.46) with hollow spectral texture.</div>
+<details><summary>prompt & text</summary><pre>GENERAL: A spectral, hollow, and menacing voice, otherworldly and whispery yet threatening.
+SCRIPT:
+(hissing, echoing with a cold dread)</pre><div class=txt>“I can see you in the shadows, a flickering spark in the endless void. You cannot hide from the memories that linger here, for I am the echo of what was lost.”</div></details></div><div class=card><div class=chip>🏆 hall of fame · s0011 · 7.04s</div>
+<audio controls preload=none src="audio/evil_ghost_s0011.mp3"></audio>
+<div class=meta><b>LoRAs:</b> char_genuine/undead@1.0 + Malevolence_Malice@1.0 + Emotional_Numbness@0.8 + vn_S_WHIS_high@1.0 + vn_TENS_high@0.8<br><b>Sampling:</b> temp 1.0 · top_p 0.95 · top_k 40<br><b>Scores:</b> GENU 0.032 · BLEND 0.16 · QUALITY 0.523</div>
+<div class=note>Winning &#x27;Evil Ghost&#x27; recipe: char_genuine/undead + Malevolence_Malice (1.0) + Emotional_Numbness (0.8) + vn_S_WHIS_high (1.0) + vn_TENS_high (0.8). High Malice (2.14) and Whisper (0.46) with hollow spectral texture.</div>
+<details><summary>prompt & text</summary><pre>GENERAL: A spectral, hollow, and menacing voice, otherworldly and whispery yet threatening.
+SCRIPT:
+(hissing, echoing with a cold dread)</pre><div class=txt>“I can see you in the shadows, a flickering spark in the endless void. You cannot hide from the memories that linger here, for I am the echo of what was lost.”</div></details></div></div>
+<details class=repd><summary>agent's final mission report</summary><pre>### Mission Report: Evil Ghost Voice
+
+**Winning Recipe:**
+- **Base Character:** `char_genuine/undead` (Scale: 1.0)
+- **Emotions:** `Malevolence_Malice` (Scale: 1.0), `Emotional_Numbness` (Scale: 0.8)
+- **VoiceNet Dimensions:** `vn_S_WHIS_high` (Scale: 1.0), `vn_TENS_high` (Scale: 0.8)
+- **Prompting Strategy:** 
+  - *Description:* &quot;A spectral, hollow, and menacing voice, otherworldly and whispery yet threatening.&quot;
+  - *Delivery Cue:* &quot;(hissing, echoing with a cold dread)&quot;
+
+**Performance Metrics:**
+- **Malevolence_Malice:** 2.148 (Strong menace)
+- **S_WHIS (Whisper):** 0.467 (Clear whispery texture)
+- **Emotional_Numbness:** 1.191 (Hollow, spectral quality)
+- **GENU (Genuineness):** 0.08 (Expected drop for supernatural effects)
+
+**Summary of Iterations:**
+1. **Iteration 1 (Undead/Malice/Numbness 0.8):** Best balance of whisper texture and menace. S_WHIS (0.467) was highest here.
+2. **Iteration 2 (Demon/Malice/Numbness 0.5):** Provided higher raw Malice but lost the &#x27;ghostly&#x27; whisper texture.
+3. **Iteration 3 (Undead/Malice/Numbness 0.7 + Nasal):** Nasal resonance added otherworldly color but slightly degraded the whisper clarity.
+
+**Final Recommendation:** Use the Iteration 1 merge. It provides the most consistent &#x27;hollow&#x27; and &#x27;menacing&#x27; spectral feel without losing the whispery, threatening delivery required for a ghost character.</pre></details></div><div class=sec><h2>Fear-filled screaming (edge case)</h2><p class=lead>Produce fear-filled screaming with real vocal bursts, starting from the evolved fear_scream genome in the agent's context. <span class=calls>12 tool calls, fully autonomous.</span></p>
+<div class=grid><div class=card><div class=chip>🏆 hall of fame · s0128 · 1.76s</div>
+<audio controls preload=none src="audio/fear_scream_s0128.mp3"></audio>
+<div class=meta><b>LoRAs:</b> Fear@1.5 + Distress@0.5 + Pain@0.25<br><b>Sampling:</b> temp 1.6 · top_p 0.95 · top_k 25<br><b>Scores:</b> GENU 0.309 · BLEND 0.845 · QUALITY 0.134</div>
+<div class=note>Best balance of high Fear strength (2.453) and peak BLEND (0.448) using Fear LoRA 1.5 at high temperature.</div>
+<details><summary>prompt & text</summary><pre>GENERAL: A visceral, gut-wrenching scream of pure terror, raw and jagged.
+SCRIPT:
+(screaming in agony, voice cracking, full-bodied scream)</pre><div class=txt>“Help me. Somebody, please.”</div></details></div><div class="card sub"><div class=chip>🧬 explore round 2 · best of 8 · fitness 2.20</div>
+<audio controls preload=none src="audio/fear_scream_evo1_s0013.mp3"></audio>
+<div class=meta><b>LoRAs:</b> Fear@1.5</div></div><div class="card sub"><div class=chip>🧬 explore round 3 · best of 8 · fitness 2.29</div>
+<audio controls preload=none src="audio/fear_scream_evo2_s0040.mp3"></audio>
+<div class=meta><b>LoRAs:</b> Distress@0.8 + Fear@0.8</div></div><div class="card sub"><div class=chip>🧬 explore round 4 · best of 8 · fitness 2.29</div>
+<audio controls preload=none src="audio/fear_scream_evo3_s0048.mp3"></audio>
+<div class=meta><b>LoRAs:</b> Distress@0.8 + Fear@0.8</div></div><div class="card sub"><div class=chip>🧬 explore round 5 · best of 8 · fitness 2.15</div>
+<audio controls preload=none src="audio/fear_scream_evo4_s0073.mp3"></audio>
+<div class=meta><b>LoRAs:</b> Distress@0.8 + Fear@1.0 + Pain@0.3</div></div></div>
+<details class=repd><summary>agent's final mission report</summary><pre>Mission complete. Target: Fear-filled screaming with real vocal bursts.
+
+Winning Genome:
+- LoRAs: [Fear: 1.5]
+- Instruction: GENERAL: A horrified voice, blood-curdling, pushed to the extreme edge of scream.
+  SCRIPT:
+  (terrified, screaming, voice cracking with panic) &lt;screaming&gt;
+- Parameters: temp=1.6, top_p=0.95, top_k=25
+
+Key Findings:
+1. The &#x27;Fear&#x27; LoRA at 1.5 is the primary driver for the target emotion, reaching strengths &gt;2.4.
+2. High temperature (&gt;=1.5) is essential for eliciting non-speech vocal bursts (BLEND) without the LoRA completely collapsing the audio into noise.
+3. A hybrid approach (Fear 1.5 + Distress 0.5) was explored but found to be less effective for raw screaming than the pure Fear 1.5 LoRA at high temperature.
+4. The best observed BLEND score was 0.448, achieved with a Fear LoRA 1.5 at temp 1.6 using the &lt;screaming&gt; tag.
+
+Final Hall of Fame sample: s0128.</pre></details></div>
+<p class=foot>Model: <code>laion/moss-tts-local-transformer-4.55b-voice-acting-v2</code> · LoRA catalogs: 40 emotions v3 ·
+114 VoiceNet dims · 240 characters · agent brain: google/gemma-4-12B QAT w4a16 on vLLM 0.26 (structured output) ·
+manuals: <a href="https://laion-ai.github.io/moss-voiceacting-manual/">conditioning</a> ·
+<a href="https://laion-ai.github.io/moss-voicenet-manual/">VoiceNet dimensions</a>.</p>
+</div></body></html>
