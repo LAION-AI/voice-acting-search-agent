@@ -20,7 +20,7 @@ llm:
   port: 8801
   gpu_memory_utilization: 0.90    # dedicated LLM GPU on the 4-GPU node
   max_model_len: 65536
-  vllm_python: /home/deployer/miniconda3/bin/python
+  vllm_python: /home/deployer/miniconda3/envs/vllm-serve/bin/python  # dedicated vLLM env
   temperature: 0.7
   max_tokens: 2048
 

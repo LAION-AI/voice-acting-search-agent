@@ -77,7 +77,6 @@ def start_server(cfg, log_path, env_extra=None):
         "--port", str(llm["port"]),
         "--gpu-memory-utilization", str(llm["gpu_memory_utilization"]),
         "--max-model-len", str(llm["max_model_len"]),
-        "--disable-log-requests",
     ]
     env = dict(os.environ)
     if env_extra:

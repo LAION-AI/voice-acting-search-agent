@@ -25,7 +25,7 @@ PORT=$(python -c "import yaml;print(yaml.safe_load(open('$CFG'))['llm']['port'])
 # 1) shared LLM on GPU0
 CUDA_VISIBLE_DEVICES=0 $LLM_PY -m vllm.entrypoints.openai.api_server \
   --model "$MODEL" --port "$PORT" --gpu-memory-utilization 0.90 \
-  --max-model-len 65536 --disable-log-requests &
+  --max-model-len 65536 &
 LLM_PID=$!
 until curl -sf "http://127.0.0.1:$PORT/v1/models" >/dev/null; do sleep 5; done
 
