@@ -1,5 +1,8 @@
 # voice-acting-search-agent
 
+> **📄 [SWARM_PLAN.md](SWARM_PLAN.md)** — technical plan for scaling this into a 32–64-agent self-improving swarm (two-tier hive-mind knowledge base, task registry, supervisor loop, consolidation, auto-discovered tools/LoRAs).
+
+
 A **fully autonomous, offline-capable search agent** that runs on a single A100-80GB (or a
 4-GPU Jupiter node) and hunts for LoRA-merge + prompt strategies that achieve a target vocal
 effect on **MOSS-VA-v2** (`laion/moss-tts-local-transformer-4.55b-voice-acting-v2`).
