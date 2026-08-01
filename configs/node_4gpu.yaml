@@ -22,7 +22,7 @@ llm:
   max_model_len: 65536
   vllm_python: /home/deployer/miniconda3/envs/vllm-serve/bin/python  # dedicated vLLM env
   temperature: 0.7
-  max_tokens: 2048
+  max_tokens: 3072
 
 paths:
   vb_dataset: /run/user/1001/vb_dataset

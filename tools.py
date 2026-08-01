@@ -142,6 +142,9 @@ def t_merge_loras(ctx, loras):
 def t_generate(ctx, text, instruction="", language="English", n=4, reference_id=None,
                temp=None, top_p=None, top_k=None, max_frames=None, seed=None):
     n = max(1, min(int(n), 16))
+    if seed is None:  # fresh randomness per call (a fixed default made replays identical)
+        import random as _rnd
+        seed = _rnd.randint(1, 10**8)
     ref_codes = None
     if reference_id is not None:
         if reference_id not in ctx.refs:
@@ -334,6 +337,13 @@ def t_run_generation(ctx, genomes, fitness, n_per_genome=None):
     if len(genomes) > 12:
         return {"error": "max 12 genomes per generation"}
     npg = int(n_per_genome or ctx.cfg["evolution"]["samples_per_genome"])
+    dup_warning = None
+    sig = json.dumps(genomes, sort_keys=True, default=str)
+    if sig == getattr(ctx, "_last_genomes_sig", None):
+        dup_warning = ("WARNING: this genome list is IDENTICAL to the previous "
+                       "generation — mutations were NOT applied. The next call must "
+                       "actually change scales/desc/cue/loras of the mutated genomes.")
+    ctx._last_genomes_sig = sig
     results = []
     for gi, g in enumerate(genomes):
         try:
@@ -384,8 +394,11 @@ def t_run_generation(ctx, genomes, fitness, n_per_genome=None):
         f.write(json.dumps(log) + "\n")
     ranked = sorted([r for r in results if "fitness_mean" in r],
                     key=lambda r: -r["fitness_mean"])
-    return {"results": results,
-            "ranking": [[r["idx"], r["fitness_mean"]] for r in ranked]}
+    out = {"results": results,
+           "ranking": [[r["idx"], r["fitness_mean"]] for r in ranked]}
+    if dup_warning:
+        out["warning"] = dup_warning
+    return out
 
 
 def t_spawn_subagent(ctx, task, budget=None):
