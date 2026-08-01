@@ -122,11 +122,19 @@ class Engine:
             if not os.path.exists(f"{local}/adapter_config.json"):
                 from huggingface_hub import hf_hub_download
                 os.makedirs(local, exist_ok=True)
-                for f in ("adapter_config.json", "adapter_model.safetensors"):
-                    src = hf_hub_download(repo, f"{sub}/{f}")
-                    tgt = os.path.join(local, f)
-                    if not os.path.exists(tgt):
-                        os.symlink(src, tgt)
+                # refined repo nests per-epoch dirs (<name>/ep3/...); prefer the latest
+                for prefix in (sub, f"{sub}/ep3", f"{sub}/ep2", f"{sub}/ep1"):
+                    try:
+                        for f in ("adapter_config.json", "adapter_model.safetensors"):
+                            src = hf_hub_download(repo, f"{prefix}/{f}")
+                            tgt = os.path.join(local, f)
+                            if not os.path.exists(tgt):
+                                os.symlink(src, tgt)
+                        break
+                    except Exception:
+                        continue
+                if not os.path.exists(f"{local}/adapter_config.json"):
+                    raise FileNotFoundError(f"could not download character LoRA {name}")
             return local
         raise FileNotFoundError(
             f"unknown LoRA '{name}' (expected an emotion name, vn_<DIM>_<high|low>, "
