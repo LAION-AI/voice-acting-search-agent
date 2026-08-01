@@ -375,6 +375,10 @@ def t_run_generation(ctx, genomes, fitness, n_per_genome=None):
     if len(genomes) > 12:
         return {"error": "max 12 genomes per generation"}
     npg = int(n_per_genome or ctx.cfg["evolution"]["samples_per_genome"])
+    if getattr(ctx, "supervisors", None) and getattr(ctx, "_sup_pending", False):
+        return {"error": "SUPERVISED MISSION: you must call supervisor_review "
+                         "(with your interpretation + top-2 sample_ids of the last "
+                         "generation) before running the next generation."}
     dup_warning = None
     sig = json.dumps(genomes, sort_keys=True, default=str)
     if sig == getattr(ctx, "_last_genomes_sig", None):
@@ -436,6 +440,11 @@ def t_run_generation(ctx, genomes, fitness, n_per_genome=None):
            "ranking": [[r["idx"], r["fitness_mean"]] for r in ranked]}
     if dup_warning:
         out["warning"] = dup_warning
+    if getattr(ctx, "supervisors", None) and ranked:
+        ctx._sup_pending = True
+        out["next_step"] = ("MANDATORY: interpret this cohort, then call supervisor_review "
+                            "with your interpretation and the top-2 sample_ids before the "
+                            "next run_generation.")
     return out
 
 
@@ -501,6 +510,7 @@ def t_supervisor_review(ctx, interpretation, top_sample_ids):
             local_v = v
     with open(f"{ctx.workdir}/supervisor_log.jsonl", "a") as f:
         f.write(json.dumps(entry, default=str) + "\n")
+    ctx._sup_pending = False
     if local_v is None:
         return {"error": "no local supervisor verdict"}
     if "error" in local_v:
