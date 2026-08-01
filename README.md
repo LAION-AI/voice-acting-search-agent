@@ -60,6 +60,20 @@ tool call parses.
 | generation activations/KV, batch 8 × 384 frames (transient peak) | ~8-12 |
 | **total peak** | **~55 GB** (≈25 GB headroom) |
 
+## Reward design (default)
+
+```
+fitness = ( Σ w_i·norm(target_i) + w_g·norm(GENU) + w_b·norm(BLEND) ) × (1 − WER),  WER ∈ [0,1]
+```
+
+Every reward **multiplies by (1 − WER)** (3-variant ASR vs the prompted text) unless the
+mission explicitly targets non-speech (screams etc.) — this is what stops over-acted,
+unintelligible deliveries from winning. Targets may be up-weighted (emotions 1.5-2×);
+GENU + BLEND together should weigh about as much as the targets (run_generation defaults
+`w_g = w_b = Σw_targets / 2`); GENU may be down-weighted for intentionally unnatural
+characters but never dropped. `run_generation` implements the formula directly
+(`fitness={maximize:{code:w}, genu_weight?, blend_weight?, wer_multiplier?:true}`).
+
 ## Tool API
 
 Full auto-generated reference in `context/system_context.md` (section *Tool reference*);

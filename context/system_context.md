@@ -53,7 +53,10 @@ Persistent scratch notes. action='append' with text, or action='read'. Write fin
 Generate n no-LoRA samples for a text and store per-code baseline means. Required before fitness constraints with min='baseline'.
 
 ### run_generation(genomes: list, fitness: dict, n_per_genome?: int)
-Evaluate ONE evolution generation (batch merge+generate+score). genomes=[{loras:[{name,scale}], desc, cue, text, temp, top_p, top_k, reference_id?, seed?}], fitness={maximize:[codes]|{code:w}, constraints:[{code, min:'baseline'|num}], penalty:2.0}. Returns per-genome mean fitness (mean-of-n), per-code means, best_sample_id, ranking.
+Evaluate ONE evolution generation (batch merge+generate+score). genomes=[{loras:[{name,scale}], desc, cue, text, temp, top_p, top_k, reference_id?, seed?}], fitness={maximize:{code:w}|[codes], genu_weight?, blend_weight?, wer_multiplier?:true, constraints:[{code, min:'baseline'|num}]?}. DEFAULT reward = (sum w_i*target_i + w_g*GENU + w_b*BLEND) * (1-WER); w_g/w_b default to half the summed target weights each; the (1-WER) factor is mandatory unless the mission explicitly targets non-speech. Returns per-genome mean fitness (mean-of-n), per-code means incl. WER, best_sample_id, ranking.
+
+### supervisor_review(interpretation: str, top_sample_ids: list)
+Send your interpretation of the latest generation + the top-2/3 sample_ids to the acoustic supervisor (an audio-understanding model that LISTENS to the takes). Returns score_0_10 + sonic directives to incorporate next generation. Call after EVERY run_generation when the mission requires supervision; interpret your cohort results BEFORE calling.
 
 ### spawn_subagent(task: str, budget?: int)
 Spawn a fresh-context copy of yourself for a focused subtask; returns its report.
@@ -94,6 +97,21 @@ Time-stretch samples WITHOUT pitch change (audiostretchy). ratio 0.25-4.0 (>1 = 
   many at full scale; merged scales add up in effect and quickly destroy intelligibility.
 - The model sometimes speaks the text TWICE in one sample (transcribe shows the text
   duplicated, WER ~1.0). Counter it with max_frames ~= 25 + 5*word_count (12.5 frames/s).
+
+
+## Reward design (HARD DEFAULT — deviate only when the mission says so)
+DEFAULT fitness per sample:
+    ( sum_i w_i*norm(target_i) + w_g*norm(GENU) + w_b*norm(BLEND) ) * (1 - WER),  WER clamped to [0,1]
+- Every reward MUST multiply by (1 - WER): unintelligible delivery is worthless, and the
+  multiplier is what stops over-acted, smeared speech from winning. Only missions that
+  explicitly target non-speech vocalization (screams, sobs, laughter bursts) may set
+  wer_multiplier=false.
+- Weights: mission targets may be up-weighted (emotions typically 1.5-2x). GENU + BLEND
+  together should normally weigh about as much as the targets combined (the run_generation
+  default: w_g = w_b = half the summed target weights). GENU may be down-weighted for
+  intentionally horrible/unnatural characters — but must never be absent by default.
+- run_generation implements this formula directly; per-sample WER comes from the 3-variant
+  ASR. Watch the per-genome WER mean in results: >0.4 means the delivery is eating the words.
 
 
 ## Evolution protocol (default search procedure)

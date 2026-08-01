@@ -312,15 +312,48 @@ def t_compute_baseline(ctx, text, instruction="", n=8, reference_id=None):
         ctx.engine.merge(prev)
 
 
-def _fitness_of(ctx, vec, fitness):
+def sample_wer(ctx, sid):
+    """Mean WER of the 3-variant ASR vs the sample's prompted text (cached, clamped 0-1)."""
+    s = ctx.samples[sid]
+    if s.get("wer") is None:
+        text = (s.get("text") or "").strip()
+        if not text:
+            s["wer"] = 0.0
+        else:
+            w, sr = ctx.load_wav(sid)
+            res = ctx.scorers.transcribe(w, sr, ref_text=text)
+            s["wer"] = float(min(1.0, max(0.0, res.get("wer_mean", 1.0))))
+    return s["wer"]
+
+
+def _fitness_of(ctx, vec, fitness, sid=None):
+    """DEFAULT reward (see system context 'Reward design'):
+        ( sum_i w_i*norm(target_i) + w_g*norm(GENU) + w_b*norm(BLEND) ) * (1 - WER)
+    WER clamped to [0,1]. The (1-WER) multiplier is ON by default and must only be
+    disabled (wer_multiplier=false) for missions that explicitly target non-speech.
+    genu_weight/blend_weight default to half the summed target weights each, so
+    GENU+BLEND together weigh about as much as the targets. Legacy
+    constraints/penalty are still applied (subtracted) when present."""
     tgt = fitness.get("maximize", {})
     if isinstance(tgt, list):
         tgt = {c: 1.0 for c in tgt}
     vals = {c: ctx.scorers.slot_value(vec, c) for c in tgt}
-    score = float(np.average(list(vals.values()), weights=list(tgt.values()))) if vals else 0.0
+    tgt_w_sum = float(sum(tgt.values())) or 1.0
+    w_g = float(fitness.get("genu_weight", tgt_w_sum / 2.0))
+    w_b = float(fitness.get("blend_weight", tgt_w_sum / 2.0))
+    genu = ctx.scorers.slot_value(vec, "GENU")
+    blend = ctx.scorers.slot_value(vec, "BLEND")
+    score = float(sum(v * tgt[c] for c, v in vals.items())) + w_g * genu + w_b * blend
+    detail = dict(vals)
+    detail["GENU"] = genu
+    detail["BLEND"] = blend
+    use_wer = bool(fitness.get("wer_multiplier", True))
+    if use_wer and sid is not None:
+        wer = sample_wer(ctx, sid)
+        detail["WER"] = wer
+        score *= (1.0 - wer)
     penalty = 0.0
     pen_w = float(fitness.get("penalty", 2.0))
-    detail = dict(vals)
     for c in fitness.get("constraints", []):
         code = c["code"]
         mn = c.get("min", "baseline")
@@ -378,7 +411,7 @@ def t_run_generation(ctx, genomes, fitness, n_per_genome=None):
             agg = {}
             for sid in sids:
                 vec = np.asarray(ctx.ensure_scores(sid)["vec"], np.float32)
-                f, detail = _fitness_of(ctx, vec, fitness)
+                f, detail = _fitness_of(ctx, vec, fitness, sid=sid)
                 fits.append(f)
                 for k, v in detail.items():
                     agg.setdefault(k, []).append(v)
@@ -404,6 +437,82 @@ def t_run_generation(ctx, genomes, fitness, n_per_genome=None):
     if dup_warning:
         out["warning"] = dup_warning
     return out
+
+
+def _evolution_trajectory(ctx):
+    traj = []
+    log = f"{ctx.workdir}/evolution_log.jsonl"
+    if os.path.exists(log):
+        for line in open(log):
+            try:
+                d = json.loads(line)
+                rows = [r["fitness_mean"] for r in d["results"] if "fitness_mean" in r]
+                if rows:
+                    traj.append({"best": _r(max(rows)), "mean": _r(np.mean(rows))})
+            except Exception:
+                pass
+    return traj
+
+
+def t_supervisor_review(ctx, interpretation, top_sample_ids):
+    """Compressed report (SWARM_PLAN §3.1) + top-take audio -> BOTH supervisors.
+    LOCAL (MOSS-Audio-8B, listens on GPU2) verdict is returned = ACTIVE feedback.
+    Gemini runs shadow-mode: logged for comparison, never returned."""
+    if not getattr(ctx, "supervisors", None):
+        return {"error": "no supervisor configured for this run"}
+    bad = [s for s in top_sample_ids if s not in ctx.samples]
+    if bad:
+        return {"error": f"unknown sample_ids {bad}"}
+    top_sample_ids = top_sample_ids[:3]
+    traj = _evolution_trajectory(ctx)
+    takes = []
+    for sid in top_sample_ids:
+        s = ctx.samples[sid]
+        row = {"sample_id": sid, "dur": s["dur"],
+               "genome": {"loras": s.get("merge"), "instruction": s.get("instruction"),
+                          "text": (s.get("text") or "")[:200], "sampling": s.get("sampling")}}
+        if s.get("scores") is not None:
+            vec = np.asarray(s["scores"]["vec"], np.float32)
+            row["scores"] = {"GENU": _r(ctx.scorers.slot_value(vec, "GENU")),
+                             "BLEND": _r(ctx.scorers.slot_value(vec, "BLEND")),
+                             "QUALITY": _r(ctx.scorers.quality(vec))}
+            if s.get("wer") is not None:
+                row["scores"]["WER"] = _r(s["wer"])
+        takes.append(row)
+    report = {
+        "objective": getattr(ctx, "mission", ""),
+        "generation": len(traj),
+        "fitness_trajectory": traj,
+        "top_takes": takes,
+        "worker_interpretation": interpretation,
+    }
+    report_s = json.dumps(report, indent=1)
+    audio_paths = [ctx.samples[sid]["path"] for sid in top_sample_ids]
+    entry = {"t": time.time(), "gen": len(traj), "report": report,
+             "top_sample_ids": top_sample_ids}
+    local_v = None
+    for name, sup in ctx.supervisors.items():
+        try:
+            v = sup.verdict(report_s, getattr(ctx, "mission", ""), audio_paths)
+        except Exception as ex:
+            v = {"error": str(ex)[:250]}
+        entry[name] = v
+        if name == "local":
+            local_v = v
+    with open(f"{ctx.workdir}/supervisor_log.jsonl", "a") as f:
+        f.write(json.dumps(entry, default=str) + "\n")
+    if local_v is None:
+        return {"error": "no local supervisor verdict"}
+    if "error" in local_v:
+        return {"supervisor_error": local_v["error"],
+                "note": "proceed with your own judgment this generation"}
+    return {"score_0_10": local_v.get("score_0_10"),
+            "verdict": local_v.get("verdict"),
+            "what_works": local_v.get("what_works"),
+            "needs_improvement": local_v.get("needs_improvement"),
+            "directives": local_v.get("directives"),
+            "note": "Directives are SONIC goals from a supervisor who listened to your top "
+                    "takes. Decide yourself how to realize them (LoRAs/prompt/sampling)."}
 
 
 def t_spawn_subagent(ctx, task, budget=None):
@@ -556,12 +665,26 @@ TOOLS = {
         "fn": t_run_generation,
         "desc": "Evaluate ONE evolution generation (batch merge+generate+score). "
                 "genomes=[{loras:[{name,scale}], desc, cue, text, temp, top_p, top_k, "
-                "reference_id?, seed?}], fitness={maximize:[codes]|{code:w}, "
-                "constraints:[{code, min:'baseline'|num}], penalty:2.0}. "
-                "Returns per-genome mean fitness (mean-of-n), per-code means, best_sample_id, ranking.",
+                "reference_id?, seed?}], fitness={maximize:{code:w}|[codes], "
+                "genu_weight?, blend_weight?, wer_multiplier?:true, "
+                "constraints:[{code, min:'baseline'|num}]?}. DEFAULT reward = "
+                "(sum w_i*target_i + w_g*GENU + w_b*BLEND) * (1-WER); w_g/w_b default to "
+                "half the summed target weights each; the (1-WER) factor is mandatory "
+                "unless the mission explicitly targets non-speech. "
+                "Returns per-genome mean fitness (mean-of-n), per-code means incl. WER, best_sample_id, ranking.",
         "params": {"genomes": {"type": list, "required": True},
                    "fitness": {"type": dict, "required": True},
                    "n_per_genome": {"type": int, "required": False}},
+    },
+    "supervisor_review": {
+        "fn": t_supervisor_review,
+        "desc": "Send your interpretation of the latest generation + the top-2/3 sample_ids "
+                "to the acoustic supervisor (an audio-understanding model that LISTENS to "
+                "the takes). Returns score_0_10 + sonic directives to incorporate next "
+                "generation. Call after EVERY run_generation when the mission requires "
+                "supervision; interpret your cohort results BEFORE calling.",
+        "params": {"interpretation": {"type": str, "required": True},
+                   "top_sample_ids": {"type": list, "required": True}},
     },
     "spawn_subagent": {
         "fn": t_spawn_subagent,

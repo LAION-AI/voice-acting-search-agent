@@ -49,7 +49,35 @@ def _enhance(models, wav, sr):
     return out.float().cpu().numpy(), 48000
 
 
-def run(ctx, sample_ids):
+def envelope_corr(wav_a, sr_a, wav_b, sr_b, win_s=0.05):
+    """Fidelity metric: Pearson corr of 50ms RMS envelopes (both resampled to 16k).
+    A faithful restoration of the SAME take scores >0.9; generative divergence scores low."""
+    import torchaudio
+
+    def env(w, sr):
+        t = torch.as_tensor(np.asarray(w, np.float32))
+        if sr != 16000:
+            t = torchaudio.functional.resample(t, sr, 16000)
+        w2 = t.numpy()
+        n = int(16000 * win_s)
+        m = len(w2) // n
+        return np.sqrt((w2[: m * n].reshape(m, n) ** 2).mean(1))
+
+    ea, eb = env(wav_a, sr_a), env(wav_b, sr_b)
+    m = min(len(ea), len(eb))
+    ea, eb = ea[:m], eb[:m]
+    if m < 10 or ea.std() < 1e-9 or eb.std() < 1e-9:
+        return 0.0
+    return float(np.corrcoef(ea, eb)[0, 1])
+
+
+# Below this envelope correlation the output is NOT a faithful restoration of the input
+# take (Sidon's generative decoder rewrites heavily degraded audio) -> output rejected.
+MIN_FIDELITY = 0.85
+
+
+def run(ctx, sample_ids, min_fidelity=None):
+    thr = MIN_FIDELITY if min_fidelity is None else float(min_fidelity)
     models = ctx.pool.get("sidon_enhance", _load, VRAM_GB, ttl_s=300)
     out = []
     for sid in sample_ids:
@@ -57,11 +85,20 @@ def run(ctx, sample_ids):
             return {"error": f"unknown sample_id '{sid}'"}
         wav, sr = ctx.load_wav(sid)
         rwav, rsr = _enhance(models, wav, sr)
+        corr = round(envelope_corr(wav, sr, rwav, rsr), 3)
+        if corr < thr:
+            out.append({"src": sid, "rejected": True, "env_corr": corr,
+                        "reason": f"restoration diverged from the input take "
+                                  f"(envelope corr {corr} < {thr}); output discarded"})
+            continue
         meta = {k: v for k, v in ctx.samples[sid].items()
                 if k not in ("path", "scores")}
-        meta.update({"enhanced_from": sid, "tool": "sidon_enhance"})
+        meta.update({"enhanced_from": sid, "tool": "sidon_enhance",
+                     "env_corr": corr})
         nid = ctx.add_sample(rwav, round(len(rwav) / rsr, 2), meta, sr=rsr)
-        out.append({"src": sid, "new_sample_id": nid,
+        out.append({"src": sid, "new_sample_id": nid, "env_corr": corr,
                     "dur": round(len(rwav) / rsr, 2), "sr": rsr})
     return {"enhanced": out,
-            "note": "restored samples are NEW samples; re-score them before comparing"}
+            "note": "restored samples passing the fidelity check are NEW samples; "
+                    "re-score them before comparing. rejected=true means Sidon could not "
+                    "faithfully restore that take (common on heavily merge-degraded audio)"}

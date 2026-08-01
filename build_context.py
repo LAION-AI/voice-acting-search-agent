@@ -88,6 +88,23 @@ def sec_prompting():
 """
 
 
+def sec_reward():
+    return """## Reward design (HARD DEFAULT — deviate only when the mission says so)
+DEFAULT fitness per sample:
+    ( sum_i w_i*norm(target_i) + w_g*norm(GENU) + w_b*norm(BLEND) ) * (1 - WER),  WER clamped to [0,1]
+- Every reward MUST multiply by (1 - WER): unintelligible delivery is worthless, and the
+  multiplier is what stops over-acted, smeared speech from winning. Only missions that
+  explicitly target non-speech vocalization (screams, sobs, laughter bursts) may set
+  wer_multiplier=false.
+- Weights: mission targets may be up-weighted (emotions typically 1.5-2x). GENU + BLEND
+  together should normally weigh about as much as the targets combined (the run_generation
+  default: w_g = w_b = half the summed target weights). GENU may be down-weighted for
+  intentionally horrible/unnatural characters — but must never be absent by default.
+- run_generation implements this formula directly; per-sample WER comes from the 3-variant
+  ASR. Watch the per-genome WER mean in results: >0.4 means the delivery is eating the words.
+"""
+
+
 def sec_evolution(cfg):
     ev = cfg["evolution"]
     return f"""## Evolution protocol (default search procedure)
@@ -224,6 +241,7 @@ def build(cfg, tool_docs_md, out_path):
         sec_header(cfg),
         "## Tool reference\n" + tool_docs_md,
         sec_prompting(),
+        sec_reward(),
         sec_evolution(cfg),
         sec_emotions(cfg),
         sec_voicenet(cfg),

@@ -27,6 +27,8 @@ def parse_args():
     ap.add_argument("--no-start-llm", dest="start_llm", action="store_false",
                     help="assume a vLLM server is already running (4-GPU node workers)")
     ap.add_argument("--rebuild-context", action="store_true")
+    ap.add_argument("--supervised", action="store_true",
+                    help="enable the acoustic supervisor loop (local MOSS active + Gemini shadow)")
     args = ap.parse_args()
     return args
 
@@ -88,6 +90,16 @@ def main():
         print(f"[run] system context: ~{info['tokens']} tokens", flush=True)
 
     ctx = ToolContext(cfg, engine, scorers, workdir)
+    ctx.mission = args.mission
+    if args.supervised:
+        from swarm.supervisor import LocalSupervisor, GeminiSupervisor
+        sup_cfg = cfg.get("supervisor", {})
+        local = LocalSupervisor(sup_cfg.get("local_url", "http://127.0.0.1:8802"))
+        if not local.healthy():
+            print("[run] WARNING: local supervisor server not reachable "
+                  "(swarm/supervisor_server.py on GPU2)", flush=True)
+        ctx.supervisors = {"local": local, "gemini": GeminiSupervisor()}
+        print("[run] supervisors: local MOSS (active) + Gemini (shadow)", flush=True)
 
     def refresh_context():
         info = BC.build(cfg, tool_docs(), ctx_path)
