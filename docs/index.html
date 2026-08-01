@@ -1,158 +1,50 @@
 <!doctype html><html><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1">
-<title>Voice-Acting Search Agent — Phase-C Canary Results</title><style>
+<title>Voice-Acting Search Agent — Results (cohort statistics)</title><style>
 :root{--bg:#0d0f14;--panel:#161a22;--bd:#2a3040;--tx:#e6e9f0;--mut:#98a2b8;--acc:#7c9cff;--a2:#f0a35e;--ok:#5ec2a3}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--tx);font:15px/1.5 -apple-system,Segoe UI,Roboto,sans-serif}
-a{color:var(--acc)}.wrap{max-width:1100px;margin:0 auto;padding:28px 20px 80px}
-h1{font-size:26px;margin:0 0 6px}h2{font-size:19px;margin:0 0 4px}
+a{color:var(--acc)}.wrap{max-width:1240px;margin:0 auto;padding:28px 20px 80px}
+h1{font-size:26px;margin:0 0 6px}h2{font-size:18px;margin:0 0 4px}
 .sub0{color:var(--mut);font-size:14px;margin:0 0 8px}
 .hero{background:linear-gradient(135deg,#1a1f2e,#141824);border:1px solid var(--bd);border-radius:16px;padding:24px;margin:0 0 24px}
-.hero code{background:#0c0e13;border:1px solid var(--bd);border-radius:5px;padding:1px 5px;font-size:12px}
-.lead{color:var(--mut);font-size:13.5px;margin:0 0 12px}
-.calls{color:var(--ok);font-size:12px}
+.hero code,.lead code{background:#0c0e13;border:1px solid var(--bd);border-radius:5px;padding:1px 5px;font-size:12px}
+.banner{background:#12241c;border:1px solid #2a4d43;border-radius:10px;padding:10px 14px;font-size:13px;color:#cfe6dd;margin:12px 0 0}
+.lead{color:var(--mut);font-size:13px;margin:0 0 10px;max-width:1100px}
 .sec{margin:30px 0 0}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px}
-.card{background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:14px}
-.card.sub{opacity:.88}.card.refc{border-color:#3a4a6a}
-.chip{font-size:11.5px;color:var(--a2);margin-bottom:8px}
-audio{width:100%;height:34px}
-.meta{font-size:12px;color:#c7cdda;margin-top:8px;line-height:1.55}
-.note{font-size:11.5px;color:var(--mut);margin-top:6px;font-style:italic}
-details{margin-top:8px;font-size:12px}summary{cursor:pointer;color:var(--acc)}
-pre{white-space:pre-wrap;background:#0c0e13;border:1px solid var(--bd);border-radius:8px;padding:10px;font-size:11.5px;color:#c7cdda;max-height:340px;overflow:auto}
-.txt{font-size:11.5px;color:var(--mut);font-style:italic;margin-top:4px}
-.repd{margin-top:12px}
+.gw{overflow-x:auto;border:1px solid var(--bd);border-radius:12px}
+.stab{width:100%;border-collapse:collapse;font-size:12.5px;min-width:900px}
+.stab th{text-align:left;color:var(--mut);font-weight:600;font-size:11px;padding:7px 8px;border-bottom:1px solid var(--bd);position:sticky;top:0;background:var(--panel)}
+.stab td{padding:8px;border-bottom:1px solid var(--bd);vertical-align:top}
+.stab tr:hover td{background:rgba(124,156,255,.04)}
+.stab audio{width:220px;height:30px}
+.gd{color:var(--mut);font-size:11px;margin-top:3px;font-weight:400}
+.sd{color:var(--mut);font-size:10.5px}
+.take{background:var(--panel);border-left:3px solid var(--acc);border-radius:0 10px 10px 0;padding:11px 15px;margin:12px 0 0;font-size:13px;color:#cdd4e2}
+.take b{color:var(--tx)}
+.pair{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0 0}
+.pcard{background:var(--panel);border:1px solid var(--bd);border-radius:12px;padding:12px;flex:1;min-width:280px}
+.pcard audio{width:100%;height:32px}
+.chip{font-size:11.5px;color:var(--a2);margin-bottom:6px}
 .foot{color:var(--mut);font-size:12px;margin-top:36px}
 </style></head><body><div class=wrap>
-<div class=hero><h1>Voice-Acting Search Agent — Phase-C Canary Results</h1>
-<p class=sub0>An <b>autonomous agent</b> (Gemma-4-12B QAT on vLLM, 38k-token conditioning manual in context, 12-tool API) running
-on a single A100-80GB alongside <code>MOSS-VA-v2</code> + the full scorer stack. Three canary missions, each solved
-end-to-end without human help: pick LoRAs + scales, write the prompt, generate batches of 8, score (EmoNet-40 ·
-VoiceNet-57 · genuineness · burst-blend · speaker-sim · WER), iterate, save the best.</p>
+<div class=hero><h1>Voice-Acting Search Agent — Results</h1>
+<p class=sub0>An autonomous agent (Gemma-4-12B QAT on vLLM, 38k-token conditioning manual in context, manifest-driven tool API)
+on a single A100-80GB with <code>MOSS-VA-v2</code> + the full scorer stack. Four missions, solved end-to-end without human help.</p>
 <p class=sub0>Repo: <a href="https://github.com/LAION-AI/voice-acting-search-agent">LAION-AI/voice-acting-search-agent</a> ·
-raw artifacts in <code>results/canary/</code>. Key emergent behavior: the agent discovered on its own that VoiceNet doses ≥1.0
-maximize the target but destroy speaker identity, and self-corrected to 0.4–0.5.</p></div>
-<div class=sec><h2>Raise Arousal on a cloned reference</h2><p class=lead>Make reference voice <b>ref1</b> express strongly raised Arousal (AROU) while staying recognizably the same speaker. <span class=calls>11 tool calls, fully autonomous.</span></p>
-<div class=grid><div class="card refc"><div class=chip>🎙️ neutral reference (input)</div>
-<audio controls preload=none src="audio/ref1.mp3"></audio>
-<div class=meta>The cloned speaker the agent had to preserve (ECAPA speaker-sim checked).</div></div><div class=card><div class=chip>🏆 hall of fame · s0078 · 10.56s</div>
-<audio controls preload=none src="audio/arousal_ref_s0078.mp3"></audio>
-<div class=meta><b>LoRAs:</b> vn_ATCK_high@0.5 + vn_AROU_high@0.4<br><b>Sampling:</b> temp 0.8 · top_p 0.9 · top_k 40<br><b>Scores:</b> GENU 0.0 · BLEND 0.0 · QUALITY 0.515</div>
-<div class=note>Best balance of Arousal (0.585) and Speaker Similarity (0.539) using hybrid vn_ATCK_high (0.5) and vn_AROU_high (0.4).</div>
-<details><summary>prompt & text</summary><pre>GENERAL: A voice vibrating with physical adrenaline, intense and grounded.
-SCRIPT:
-(with a voice physically vibrating with adrenaline, intense and grounded)</pre><div class=txt>“The atmosphere was heavy with anticipation as we stood on the precipice of a new era, waiting for the first light of dawn to break the horizon.”</div></details></div><div class="card sub"><div class=chip>🧬 explore round 1 · best of 8 · fitness 0.89</div>
-<audio controls preload=none src="audio/arousal_ref_evo0_s0011.mp3"></audio>
-<div class=meta><b>LoRAs:</b> vn_AROU_high@1.0</div></div><div class="card sub"><div class=chip>🧬 explore round 3 · best of 8 · fitness 0.56</div>
-<audio controls preload=none src="audio/arousal_ref_evo2_s0051.mp3"></audio>
-<div class=meta><b>LoRAs:</b> vn_AROU_high@0.6 + vn_ATCK_high@0.7</div></div><div class="card sub"><div class=chip>🧬 explore round 4 · best of 8 · fitness 0.56</div>
-<audio controls preload=none src="audio/arousal_ref_evo3_s0078.mp3"></audio>
-<div class=meta><b>LoRAs:</b> vn_ATCK_high@0.5 + vn_AROU_high@0.4</div></div><div class="card sub"><div class=chip>🧬 explore round 5 · best of 8 · fitness 0.61</div>
-<audio controls preload=none src="audio/arousal_ref_evo4_s0099.mp3"></audio>
-<div class=meta><b>LoRAs:</b> vn_ATCK_high@0.4 + vn_AROU_high@0.4</div></div></div>
-<details class=repd><summary>agent's final mission report</summary><pre>The mission to raise Arousal (AROU) for &#x27;ref1&#x27; while maintaining speaker identity was successful. 
-
-**Winning Recipe:**
-- **LoRAs &amp; Scales:** `vn_ATCK_high` (0.5), `vn_AROU_high` (0.4)
-- **Prompt:** &quot;A voice vibrating with physical adrenaline, intense and grounded.&quot;
-- **Delivery Cue:** &quot;(with a voice physically vibrating with adrenaline, intense and grounded)&quot;
-- **Sampling:** temp 0.8, top_p 0.9, top_k 40
-
-**Key Metrics:**
-- **Baseline AROU:** 0.458
-- **Target AROU:** 0.585
-- **Speaker Similarity:** 0.539 (Retained identity well)
-- **Quality:** 0.538
-
-**Analysis:** 
-High-dose LoRAs (1.0x+) successfully pushed Arousal to 0.64+ but caused significant speaker drift (Similarity &lt; 0.45) and destroyed Genuineness. The winning hybrid strategy (0.4-0.5x scales) provided a substantial, audible lift in Arousal while preserving the cinematic, deep-toned character of &#x27;ref1&#x27; with a much higher similarity score (0.539).</pre></details></div><div class=sec><h2>Evil ghost voice (no reference)</h2><p class=lead>Create a convincing evil ghost: spectral, hollow, menacing, whispery yet threatening — free choice of character/emotion/VoiceNet LoRAs. <span class=calls>14 tool calls, fully autonomous.</span></p>
-<div class=grid><div class=card><div class=chip>🏆 hall of fame · s0005 · 36.8s</div>
-<audio controls preload=none src="audio/evil_ghost_s0005.mp3"></audio>
-<div class=meta><b>LoRAs:</b> char_genuine/undead@1.0 + Malevolence_Malice@1.0 + Emotional_Numbness@0.8 + vn_S_WHIS_high@1.0 + vn_TENS_high@0.8<br><b>Sampling:</b> temp 1.0 · top_p 0.95 · top_k 40<br><b>Scores:</b> GENU 0.186 · BLEND 0.171 · QUALITY 0.356</div>
-<div class=note>Winning &#x27;Evil Ghost&#x27; recipe: char_genuine/undead + Malevolence_Malice (1.0) + Emotional_Numbness (0.8) + vn_S_WHIS_high (1.0) + vn_TENS_high (0.8). High Malice (2.14) and Whisper (0.46) with hollow spectral texture.</div>
-<details><summary>prompt & text</summary><pre>GENERAL: A spectral, hollow, and menacing voice, otherworldly and whispery yet threatening.
-SCRIPT:
-(hissing, echoing with a cold dread)</pre><div class=txt>“I can see you in the shadows, a flickering spark in the endless void. You cannot hide from the memories that linger here, for I am the echo of what was lost.”</div></details></div><div class=card><div class=chip>🏆 hall of fame · s0011 · 7.04s</div>
-<audio controls preload=none src="audio/evil_ghost_s0011.mp3"></audio>
-<div class=meta><b>LoRAs:</b> char_genuine/undead@1.0 + Malevolence_Malice@1.0 + Emotional_Numbness@0.8 + vn_S_WHIS_high@1.0 + vn_TENS_high@0.8<br><b>Sampling:</b> temp 1.0 · top_p 0.95 · top_k 40<br><b>Scores:</b> GENU 0.032 · BLEND 0.16 · QUALITY 0.523</div>
-<div class=note>Winning &#x27;Evil Ghost&#x27; recipe: char_genuine/undead + Malevolence_Malice (1.0) + Emotional_Numbness (0.8) + vn_S_WHIS_high (1.0) + vn_TENS_high (0.8). High Malice (2.14) and Whisper (0.46) with hollow spectral texture.</div>
-<details><summary>prompt & text</summary><pre>GENERAL: A spectral, hollow, and menacing voice, otherworldly and whispery yet threatening.
-SCRIPT:
-(hissing, echoing with a cold dread)</pre><div class=txt>“I can see you in the shadows, a flickering spark in the endless void. You cannot hide from the memories that linger here, for I am the echo of what was lost.”</div></details></div></div>
-<details class=repd><summary>agent's final mission report</summary><pre>### Mission Report: Evil Ghost Voice
-
-**Winning Recipe:**
-- **Base Character:** `char_genuine/undead` (Scale: 1.0)
-- **Emotions:** `Malevolence_Malice` (Scale: 1.0), `Emotional_Numbness` (Scale: 0.8)
-- **VoiceNet Dimensions:** `vn_S_WHIS_high` (Scale: 1.0), `vn_TENS_high` (Scale: 0.8)
-- **Prompting Strategy:** 
-  - *Description:* &quot;A spectral, hollow, and menacing voice, otherworldly and whispery yet threatening.&quot;
-  - *Delivery Cue:* &quot;(hissing, echoing with a cold dread)&quot;
-
-**Performance Metrics:**
-- **Malevolence_Malice:** 2.148 (Strong menace)
-- **S_WHIS (Whisper):** 0.467 (Clear whispery texture)
-- **Emotional_Numbness:** 1.191 (Hollow, spectral quality)
-- **GENU (Genuineness):** 0.08 (Expected drop for supernatural effects)
-
-**Summary of Iterations:**
-1. **Iteration 1 (Undead/Malice/Numbness 0.8):** Best balance of whisper texture and menace. S_WHIS (0.467) was highest here.
-2. **Iteration 2 (Demon/Malice/Numbness 0.5):** Provided higher raw Malice but lost the &#x27;ghostly&#x27; whisper texture.
-3. **Iteration 3 (Undead/Malice/Numbness 0.7 + Nasal):** Nasal resonance added otherworldly color but slightly degraded the whisper clarity.
-
-**Final Recommendation:** Use the Iteration 1 merge. It provides the most consistent &#x27;hollow&#x27; and &#x27;menacing&#x27; spectral feel without losing the whispery, threatening delivery required for a ghost character.</pre></details></div><div class=sec><h2>Fear-filled screaming (edge case)</h2><p class=lead>Produce fear-filled screaming with real vocal bursts, starting from the evolved fear_scream genome in the agent's context. <span class=calls>12 tool calls, fully autonomous.</span></p>
-<div class=grid><div class=card><div class=chip>🏆 hall of fame · s0128 · 1.76s</div>
-<audio controls preload=none src="audio/fear_scream_s0128.mp3"></audio>
-<div class=meta><b>LoRAs:</b> Fear@1.5 + Distress@0.5 + Pain@0.25<br><b>Sampling:</b> temp 1.6 · top_p 0.95 · top_k 25<br><b>Scores:</b> GENU 0.309 · BLEND 0.845 · QUALITY 0.134</div>
-<div class=note>Best balance of high Fear strength (2.453) and peak BLEND (0.448) using Fear LoRA 1.5 at high temperature.</div>
-<details><summary>prompt & text</summary><pre>GENERAL: A visceral, gut-wrenching scream of pure terror, raw and jagged.
-SCRIPT:
-(screaming in agony, voice cracking, full-bodied scream)</pre><div class=txt>“Help me. Somebody, please.”</div></details></div><div class="card sub"><div class=chip>🧬 explore round 2 · best of 8 · fitness 2.20</div>
-<audio controls preload=none src="audio/fear_scream_evo1_s0013.mp3"></audio>
-<div class=meta><b>LoRAs:</b> Fear@1.5</div></div><div class="card sub"><div class=chip>🧬 explore round 3 · best of 8 · fitness 2.29</div>
-<audio controls preload=none src="audio/fear_scream_evo2_s0040.mp3"></audio>
-<div class=meta><b>LoRAs:</b> Distress@0.8 + Fear@0.8</div></div><div class="card sub"><div class=chip>🧬 explore round 4 · best of 8 · fitness 2.29</div>
-<audio controls preload=none src="audio/fear_scream_evo3_s0048.mp3"></audio>
-<div class=meta><b>LoRAs:</b> Distress@0.8 + Fear@0.8</div></div><div class="card sub"><div class=chip>🧬 explore round 5 · best of 8 · fitness 2.15</div>
-<audio controls preload=none src="audio/fear_scream_evo4_s0073.mp3"></audio>
-<div class=meta><b>LoRAs:</b> Distress@0.8 + Fear@1.0 + Pain@0.3</div></div></div>
-<details class=repd><summary>agent's final mission report</summary><pre>Mission complete. Target: Fear-filled screaming with real vocal bursts.
-
-Winning Genome:
-- LoRAs: [Fear: 1.5]
-- Instruction: GENERAL: A horrified voice, blood-curdling, pushed to the extreme edge of scream.
-  SCRIPT:
-  (terrified, screaming, voice cracking with panic) &lt;screaming&gt;
-- Parameters: temp=1.6, top_p=0.95, top_k=25
-
-Key Findings:
-1. The &#x27;Fear&#x27; LoRA at 1.5 is the primary driver for the target emotion, reaching strengths &gt;2.4.
-2. High temperature (&gt;=1.5) is essential for eliciting non-speech vocal bursts (BLEND) without the LoRA completely collapsing the audio into noise.
-3. A hybrid approach (Fear 1.5 + Distress 0.5) was explored but found to be less effective for raw screaming than the pure Fear 1.5 LoRA at high temperature.
-4. The best observed BLEND score was 0.448, achieved with a Fear LoRA 1.5 at temp 1.6 using the &lt;screaming&gt; tag.
-
-Final Hall of Fame sample: s0128.</pre></details></div>
-<div class=sec><h2>Phase D — Benchmark: AROU + VALN + EXPL + S_STRY (constrained)</h2>
-<p class=lead>Full autonomous evolution: maximize Arousal, Valence, Content-Explicitness and Storytelling style simultaneously,
-with genuineness and vocal-burst blend constrained to stay ≥ the no-LoRA baseline. 12 generations × 8–11 genomes, mean-of-8, zero tool errors.
-<span class=calls>Best fitness 0.600 → 0.630; ceiling axis: EXPL.</span></p>
-<div class=grid>
-<div class=card><div class=chip>🏆 confirmed best genome · 11.8s</div>
-<audio controls preload=none src="audio/bench_s0021.mp3"></audio>
-<div class=meta><b>LoRAs:</b> vn_AROU_high@0.8 + vn_VALN_high@1.0 + vn_EXPL_high@1.1 + vn_S_STRY_high@1.0<br>
-<b>Prompt:</b> "A balanced, high-impact storyteller." · cue "(with impact)" · temp 1.0<br>
-<b>vs baseline:</b> AROU 0.79 (0.22) · VALN 0.44 (0.17) · EXPL 0.18 (0.06) · S_STRY 0.80 (0.22) · GENU 0.19≥base ✓ · BLEND 0.21≥base ✓</div>
-<div class=note>Balanced multi-VN merges at 0.8–1.1 beat single-LoRA extremes — the only strategy that kept BLEND above baseline.</div></div>
-<div class=card><div class=chip>✨ same winner, sidon_enhance'd (new lazy tool)</div>
-<audio controls preload=none src="audio/bench_s0033_sidon.mp3"></audio>
-<div class=meta><b>Restoration recovers merge damage:</b> GENU 0.191 → 0.264 · BLEND 0.205 → 0.327.<br>
-The agent invoked the freshly integrated SIDON restoration tool on its own winner and measured the gain.</div></div>
-</div>
-<details class=repd><summary>full results</summary><pre>See results/benchmark_arou_valn_expl_stry/RESULTS.md in the repo:
-fitness trajectory gen0 0.600 → gen6 0.629 → gen10 0.630 (means peaked 0.562), diminishing returns after gen 6.
-Emotion-LoRA route (Elation+Triumph@0.8) reached higher raw AROU/VALN (0.93/0.72) but broke the BLEND constraint.
-EXPL is the stubborn axis: vn_EXPL_high@1.1 yields only +0.12. QUALITY pays the usual merge tax (0.30 vs 0.48).</pre></details></div>
-<p class=foot>Model: <code>laion/moss-tts-local-transformer-4.55b-voice-acting-v2</code> · LoRA catalogs: 40 emotions v3 ·
-114 VoiceNet dims · 240 characters · agent brain: google/gemma-4-12B QAT w4a16 on vLLM 0.26 (structured output) ·
-manuals: <a href="https://laion-ai.github.io/moss-voiceacting-manual/">conditioning</a> ·
+<a href="https://github.com/LAION-AI/voice-acting-search-agent/blob/main/SWARM_PLAN.md">SWARM plan</a> · raw logs under <code>results/</code>.</p>
+<div class=banner>📊 <b>Methodology:</b> every strategy is evaluated as a <b>cohort of 8 samples</b>; all rankings on this page use the
+<b>cohort mean</b> (never a single lucky sample). Tables show per-cohort statistics — the same evidence a SWARM supervisor
+will receive. Audio players are the best sample <i>of the ranked cohort</i>, for listening only.</div></div>
+<div class=sec><h2>Canary 1 — Raise Arousal on cloned reference ref1</h2><p class=lead>Fitness = cohort mean-of-8 of z-scored AROU with GENU & speaker constraints. Baseline AROU 0.458.</p><div class=gw><table class=stab><tr><th>#</th><th>strategy (LoRAs @ scale)</th><th>n</th><th>fitness (mean / best)</th><th>AROU μ</th><th>GENU μ</th><th>QUALITY μ</th><th>listen (best of cohort)</th></tr><tr><td>1</td><td><b>vn_ATCK_high@1.25</b><div class=gd>“A voice with sharp attack and high energy.” · cue (with sharp, aggressive attack) · t0.85</div></td><td>8</td><td><b>0.607</b> / best 0.841</td><td>0.607</td><td>0.006</td><td>0.511</td><td><audio controls preload=none src='audio/ar_top1_s0020.mp3'></audio></td></tr><tr><td>2</td><td><b>vn_DARC_high@1.25</b><div class=gd>“A voice with a high dynamic arc and intense energy.” · cue (with a high dynamic arc) · t0.85</div></td><td>8</td><td><b>0.588</b> / best 0.689</td><td>0.588</td><td>0.031</td><td>0.522</td><td><audio controls preload=none src='audio/ar_top2_s0029.mp3'></audio></td></tr><tr><td>3</td><td><b>vn_AROU_high@1.0</b><div class=gd>“A voice with high arousal, intense and energetic.” · cue (with high energy and intensity) · t0.85</div></td><td>8</td><td><b>0.553</b> / best 0.886</td><td>0.569</td><td>0.004</td><td>0.48</td><td><audio controls preload=none src='audio/ar_top3_s0011.mp3'></audio></td></tr></table></div><div class=pair><div class=pcard><div class=chip>🎙️ neutral reference (input)</div><audio controls preload=none src="audio/ref1.mp3"></audio></div></div>
+<div class=take><b>Why the hall-of-fame pick sounds less 'excited' than some explore samples:</b> the mission demanded staying recognizably the same speaker. Cohorts with doses ≥1.0 hit AROU ≈0.64 but collapsed speaker similarity; the winning cohort (0.4–0.5 doses) trades a little arousal for identity. Ranking is ALWAYS the cohort mean, never one lucky sample.</div>
+<p class=lead style="margin-top:6px">Full raw data: <code>results/…/evolution_log.jsonl · transcript.jsonl</code> in the repo.</p></div><div class=sec><h2>Canary 2 — Evil ghost voice (no reference)</h2><p class=lead>No evolution loop here — the agent hand-compared three merge strategies, each scored as a full cohort (mean ± sd shown).</p><div class=gw><table class=stab><tr><th>#</th><th>strategy (LoRAs @ scale)</th><th>n</th><th>Malice μ±σ</th><th>Numbness μ±σ</th><th>Whisper μ±σ</th><th>Tension μ±σ</th><th>GENU μ±σ</th><th>BLEND μ±σ</th><th>QUALITY μ±σ</th><th>listen (best of cohort)</th></tr><tr><td>1</td><td><b>char_genuine/demon@1.0 + Malevolence_Malice@1.0 + Emotional_Numbness@0.5 + vn_S_WHIS_high@1.0 + vn_TENS_high@0.8 + vn_R_NASL_high@0.7</b></td><td>8</td><td>2.22<span class=sd> ±0.535</span></td><td>0.84<span class=sd> ±0.974</span></td><td>0.357<span class=sd> ±0.174</span></td><td>0.596<span class=sd> ±0.124</span></td><td>0.082<span class=sd> ±0.021</span></td><td>0.183<span class=sd> ±0.088</span></td><td>0.436<span class=sd> ±0.11</span></td><td><audio controls preload=none src='audio/eg_top1_s0018.mp3'></audio></td></tr><tr><td>2</td><td><b>char_genuine/undead@1.0 + Malevolence_Malice@1.0 + Emotional_Numbness@0.8 + vn_S_WHIS_high@1.0 + vn_TENS_high@0.8</b></td><td>8</td><td>2.148<span class=sd> ±0.597</span></td><td>1.191<span class=sd> ±0.432</span></td><td>0.467<span class=sd> ±0.106</span></td><td>0.554<span class=sd> ±0.074</span></td><td>0.08<span class=sd> ±0.045</span></td><td>0.142<span class=sd> ±0.078</span></td><td>0.493<span class=sd> ±0.075</span></td><td><audio controls preload=none src='audio/eg_top2_s0011.mp3'></audio></td></tr><tr><td>3</td><td><b>char_genuine/undead@1.0 + Malevolence_Malice@1.0 + Emotional_Numbness@0.7 + vn_S_WHIS_high@1.0 + vn_TENS_high@0.8 + vn_R_NASL_high@0.7</b></td><td>8</td><td>1.861<span class=sd> ±0.93</span></td><td>0.962<span class=sd> ±0.946</span></td><td>0.277<span class=sd> ±0.188</span></td><td>0.528<span class=sd> ±0.124</span></td><td>0.126<span class=sd> ±0.099</span></td><td>0.142<span class=sd> ±0.17</span></td><td>0.437<span class=sd> ±0.097</span></td><td><audio controls preload=none src='audio/eg_top3_s0021.mp3'></audio></td></tr></table></div>
+<div class=take>Ranked by cohort-mean Malevolence_Malice. The undead-based merge beat the demon variant on menace while keeping the whispery character (S_WHIS).</div>
+<p class=lead style="margin-top:6px">Full raw data: <code>results/…/evolution_log.jsonl · transcript.jsonl</code> in the repo.</p></div><div class=sec><h2>Canary 3 — Fear-filled screaming (edge case)</h2><p class=lead>Fitness = cohort mean-of-8 over Fear + BLEND (WER unconstrained). Started from the evolved fear_scream genome.</p><div class=gw><table class=stab><tr><th>#</th><th>strategy (LoRAs @ scale)</th><th>n</th><th>fitness (mean / best)</th><th>Fear μ</th><th>BLEND μ</th><th>GENU μ</th><th>QUALITY μ</th><th>listen (best of cohort)</th></tr><tr><td>1</td><td><b>Distress@0.8 + Fear@1.0 + Pain@0.3</b><div class=gd>“A visceral, gut-wrenching scream of pure terror, raw and jagged.” · cue (screaming in agony, voice cracking, full-bodied scream) · t1.3</div></td><td>8</td><td><b>1.573</b> / best 2.154</td><td>2.913</td><td>0.233</td><td>—</td><td>0.129</td><td><audio controls preload=none src='audio/fs_top1_s0073.mp3'></audio></td></tr><tr><td>2</td><td><b>Distress@0.8 + Fear@0.8</b><div class=gd>“A scream of pure, agonizing terror, breaking into raw vocal bursts.” · cue (screaming in absolute agony, voice cracking, full-bodied scream) · t1.2</div></td><td>8</td><td><b>1.462</b> / best 2.295</td><td>2.622</td><td>0.303</td><td>—</td><td>0.187</td><td><audio controls preload=none src='audio/fs_top2_s0040.mp3'></audio></td></tr><tr><td>3</td><td><b>Fear@1.5</b><div class=gd>“A horrified voice, blood-curdling, pushed to the extreme edge of scream.” · cue (terrified, screaming, voice cracking with panic) · t1.4</div></td><td>8</td><td><b>1.423</b> / best 2.049</td><td>2.671</td><td>0.174</td><td>—</td><td>0.163</td><td><audio controls preload=none src='audio/fs_top3_s0064.mp3'></audio></td></tr></table></div>
+<div class=take>High temperature (≥1.5) was necessary for real vocal bursts; Fear@1.5 is the primary driver (cohort means >1.3).</div>
+<p class=lead style="margin-top:6px">Full raw data: <code>results/…/evolution_log.jsonl · transcript.jsonl</code> in the repo.</p></div><div class=sec><h2>Phase D — Benchmark: maximize AROU + VALN + EXPL + S_STRY (GENU &amp; BLEND ≥ baseline)</h2><p class=lead>12 generations × 8–11 genomes, every genome evaluated as a mean-of-8 cohort; constraints penalty-weighted. Baselines: AROU 0.222 · VALN 0.165 · EXPL 0.059 · S_STRY 0.222 · GENU 0.090 · BLEND 0.194. Trajectory: gen0 0.600 · gen1 0.586 · gen2 0.595 · gen3 0.599 · gen4 0.606 · gen5 0.614 · gen6 0.629 · gen7 0.601 · gen8 0.613 · gen9 0.613 · gen10 0.630 · gen11 0.601 (best-of-gen fitness; cohort means peaked 0.562).</p><div class=gw><table class=stab><tr><th>#</th><th>strategy (LoRAs @ scale)</th><th>n</th><th>fitness (mean / best)</th><th>AROU μ</th><th>VALN μ</th><th>EXPL μ</th><th>S_STRY μ</th><th>GENU μ</th><th>BLEND μ</th><th>QUALITY μ</th><th>listen (best of cohort)</th></tr><tr><td>1</td><td><b>vn_AROU_high@0.8 + vn_VALN_high@0.8 + vn_S_STRY_high@0.8 + emotion_elation@0.8 + emotion_triumph@0.8</b><div class=gd>“A high-energy, positive, and triumphant storyteller.” · cue (joyfully and triumphantly) · t1.0</div></td><td>8</td><td><b>0.630</b> / best 0.688</td><td>0.927</td><td>0.719</td><td>0.057</td><td>0.818</td><td>0.138</td><td>0.158</td><td>0.227</td><td><audio controls preload=none src='audio/bm_top1_s0826.mp3'></audio></td></tr><tr><td>2</td><td><b>vn_AROU_high@0.8 + vn_VALN_high@1.0 + vn_EXPL_high@1.1 + vn_S_STRY_high@1.0</b><div class=gd>“A balanced, high-impact storyteller.” · cue (with impact) · t1.0</div></td><td>8</td><td><b>0.629</b> / best 0.675</td><td>0.895</td><td>0.652</td><td>0.186</td><td>0.808</td><td>0.147</td><td>0.149</td><td>0.254</td><td><audio controls preload=none src='audio/bm_top2_s0457.mp3'></audio></td></tr><tr><td>3</td><td><b>vn_AROU_high@0.8 + vn_VALN_high@1.3 + vn_EXPL_high@1.0 + vn_S_STRY_high@1.2</b><div class=gd>“A warm, high-valence storyteller with strong narrative flow.” · cue (with warm, engaging energy) · t1.0</div></td><td>8</td><td><b>0.613</b> / best 0.700</td><td>0.863</td><td>0.515</td><td>0.279</td><td>0.818</td><td>0.167</td><td>0.192</td><td>0.244</td><td><audio controls preload=none src='audio/bm_top3_s0612.mp3'></audio></td></tr></table></div><div class=pair><div class=pcard><div class=chip>🏆 confirmed winner (fresh mean-of-8 re-validation)</div><audio controls preload=none src="audio/bench_s0021.mp3"></audio></div>
+<div class=pcard><div class=chip>✨ same take after sidon_enhance</div><audio controls preload=none src="audio/bench_s0033_sidon.mp3"></audio></div></div>
+<div class=take>Balanced multi-VN merges (0.8–1.1) were the only strategy keeping BLEND ≥ baseline; the emotion-LoRA route (Elation+Triumph@0.8) reached higher raw AROU/VALN but broke the constraint. EXPL is the stubborn axis (+0.12 max). Bonus: <b>sidon_enhance</b> on the winner lifted GENU 0.191→0.264 and BLEND 0.205→0.327 (player below).</div>
+<p class=lead style="margin-top:6px">Full raw data: <code>results/…/RESULTS.md · evolution_log.jsonl · transcript.jsonl</code> in the repo.</p></div>
+<p class=foot>Model: <code>laion/moss-tts-local-transformer-4.55b-voice-acting-v2</code> · LoRA catalogs: 40 emotions v3 · 114 VoiceNet dims ·
+240 characters · manuals: <a href="https://laion-ai.github.io/moss-voiceacting-manual/">conditioning</a> ·
 <a href="https://laion-ai.github.io/moss-voicenet-manual/">VoiceNet dimensions</a>.</p>
 </div></body></html>
