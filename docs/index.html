@@ -131,6 +131,26 @@ Key Findings:
 4. The best observed BLEND score was 0.448, achieved with a Fear LoRA 1.5 at temp 1.6 using the &lt;screaming&gt; tag.
 
 Final Hall of Fame sample: s0128.</pre></details></div>
+<div class=sec><h2>Phase D — Benchmark: AROU + VALN + EXPL + S_STRY (constrained)</h2>
+<p class=lead>Full autonomous evolution: maximize Arousal, Valence, Content-Explicitness and Storytelling style simultaneously,
+with genuineness and vocal-burst blend constrained to stay ≥ the no-LoRA baseline. 12 generations × 8–11 genomes, mean-of-8, zero tool errors.
+<span class=calls>Best fitness 0.600 → 0.630; ceiling axis: EXPL.</span></p>
+<div class=grid>
+<div class=card><div class=chip>🏆 confirmed best genome · 11.8s</div>
+<audio controls preload=none src="audio/bench_s0021.mp3"></audio>
+<div class=meta><b>LoRAs:</b> vn_AROU_high@0.8 + vn_VALN_high@1.0 + vn_EXPL_high@1.1 + vn_S_STRY_high@1.0<br>
+<b>Prompt:</b> "A balanced, high-impact storyteller." · cue "(with impact)" · temp 1.0<br>
+<b>vs baseline:</b> AROU 0.79 (0.22) · VALN 0.44 (0.17) · EXPL 0.18 (0.06) · S_STRY 0.80 (0.22) · GENU 0.19≥base ✓ · BLEND 0.21≥base ✓</div>
+<div class=note>Balanced multi-VN merges at 0.8–1.1 beat single-LoRA extremes — the only strategy that kept BLEND above baseline.</div></div>
+<div class=card><div class=chip>✨ same winner, sidon_enhance'd (new lazy tool)</div>
+<audio controls preload=none src="audio/bench_s0033_sidon.mp3"></audio>
+<div class=meta><b>Restoration recovers merge damage:</b> GENU 0.191 → 0.264 · BLEND 0.205 → 0.327.<br>
+The agent invoked the freshly integrated SIDON restoration tool on its own winner and measured the gain.</div></div>
+</div>
+<details class=repd><summary>full results</summary><pre>See results/benchmark_arou_valn_expl_stry/RESULTS.md in the repo:
+fitness trajectory gen0 0.600 → gen6 0.629 → gen10 0.630 (means peaked 0.562), diminishing returns after gen 6.
+Emotion-LoRA route (Elation+Triumph@0.8) reached higher raw AROU/VALN (0.93/0.72) but broke the BLEND constraint.
+EXPL is the stubborn axis: vn_EXPL_high@1.1 yields only +0.12. QUALITY pays the usual merge tax (0.30 vs 0.48).</pre></details></div>
 <p class=foot>Model: <code>laion/moss-tts-local-transformer-4.55b-voice-acting-v2</code> · LoRA catalogs: 40 emotions v3 ·
 114 VoiceNet dims · 240 characters · agent brain: google/gemma-4-12B QAT w4a16 on vLLM 0.26 (structured output) ·
 manuals: <a href="https://laion-ai.github.io/moss-voiceacting-manual/">conditioning</a> ·
