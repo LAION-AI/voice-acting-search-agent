@@ -138,7 +138,7 @@ class Handler(BaseHTTPRequestHandler):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--port", type=int, default=8802)
+    ap.add_argument("--port", type=int, default=8809)
     args = ap.parse_args()
     Handler.model, Handler.proc = load_model()
     print(f"[supervisor] serving on :{args.port}", flush=True)

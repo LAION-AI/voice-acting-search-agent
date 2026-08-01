@@ -21,6 +21,15 @@ class LLMClient:
     def __init__(self, cfg):
         self.base_url = cfg["llm"]["base_url"].rstrip("/")
         self.model = cfg["llm"]["model"]
+        try:  # multi-arm support: trust whatever model the server actually serves
+            req = urllib.request.Request(self.base_url + "/models")
+            with urllib.request.urlopen(req, timeout=5) as r:
+                served = [m["id"] for m in json.loads(r.read()).get("data", [])]
+            if served and self.model not in served:
+                print(f"[llm] serving {served[0]} (config said {self.model})")
+                self.model = served[0]
+        except Exception:
+            pass
         self.temperature = float(cfg["llm"].get("temperature", 0.7))
         self.max_tokens = int(cfg["llm"].get("max_tokens", 2048))
 

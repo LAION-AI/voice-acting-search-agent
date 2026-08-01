@@ -57,7 +57,7 @@ def parse_verdict(text):
 class LocalSupervisor:
     """MOSS-Audio-8B-Thinking behind swarm/supervisor_server.py (HTTP)."""
 
-    def __init__(self, base_url="http://127.0.0.1:8802"):
+    def __init__(self, base_url="http://127.0.0.1:8809"):
         self.base_url = base_url.rstrip("/")
 
     def healthy(self):

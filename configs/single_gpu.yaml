@@ -82,4 +82,4 @@ repo:
   url: https://github.com/LAION-AI/voice-acting-search-agent
 
 supervisor:
-  local_url: http://127.0.0.1:8802   # swarm/supervisor_server.py (MOSS-Audio-8B on GPU 2)
+  local_url: http://127.0.0.1:8809   # swarm/supervisor_server.py (MOSS-Audio-8B on GPU 2)

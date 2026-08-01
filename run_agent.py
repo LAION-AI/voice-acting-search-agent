@@ -39,6 +39,8 @@ def main():
     import yaml
     cfg_path = args.config or os.path.join(here, "configs/single_gpu.yaml")
     cfg = yaml.safe_load(open(cfg_path))
+    if args.llm_url:
+        cfg["llm"]["base_url"] = args.llm_url
     cfg["repo_dir"] = here
 
     gpu = cfg["gpu"] if args.gpu is None else args.gpu
