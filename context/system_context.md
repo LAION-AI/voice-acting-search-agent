@@ -86,6 +86,8 @@ End the mission with a final report: {report: '...'}.
   not required. Combine: moderate LoRA (0.75-1.25) + evolved prompt is the usual winner.
 - Raising several targets at once: prefer one strong driver LoRA + small helpers, not
   many at full scale; merged scales add up in effect and quickly destroy intelligibility.
+- The model sometimes speaks the text TWICE in one sample (transcribe shows the text
+  duplicated, WER ~1.0). Counter it with max_frames ~= 25 + 5*word_count (12.5 frames/s).
 
 
 ## Evolution protocol (default search procedure)
