@@ -6,6 +6,12 @@
 # Missions/budget identical to the 12B arm (fairness): 60 tool calls, 8 gens x 8 genomes.
 set -u
 TAG=$1; PORT=$2; GPUS=(${3:-3 4 5 6})
+# PORT may be a full base URL (external API arm), e.g. https://api.hyprlab.io/v1 —
+# then also export LLM_MODEL (pin), LLM_API_KEY (Bearer), LLM_REASONING_EFFORT before calling.
+case "$PORT" in
+  http*) LLMURL="$PORT" ;;
+  *)     LLMURL="http://127.0.0.1:${PORT}/v1" ;;
+esac
 exec >> /tmp/vaa_arm_${TAG}.log 2>&1
 source /home/deployer/miniconda3/etc/profile.d/conda.sh; conda activate ml-general
 export HF_HOME=/tmp/hf_cache HF_HUB_DISABLE_XET=1 TOKENIZERS_PARALLELISM=false
@@ -23,7 +29,7 @@ i=0
 for k in arousal valence explicit storyteller; do
   g=${GPUS[$i]}; i=$((i+1))
   nohup python -u run_agent.py --mission "${M[$k]}" --budget-tool-calls 60 --gpu "$g" \
-    --no-start-llm --llm-url "http://127.0.0.1:${PORT}/v1" \
+    --no-start-llm --llm-url "$LLMURL" \
     --workdir "runs/singledim${TAG}_$k" > "/tmp/vaa_arm_${TAG}_$k.log" 2>&1 &
   echo "[arm-$TAG] launched $k on GPU$g pid $!"
   sleep 20

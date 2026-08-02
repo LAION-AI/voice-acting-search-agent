@@ -123,6 +123,11 @@ def main():
     print("\n========== FINAL REPORT ==========")
     print(res["report"])
     print(f"\n[run] tool calls used: {res['tool_calls_used']}  workdir: {workdir}")
+    try:
+        json.dump(agent.llm.usage_totals, open(os.path.join(workdir, "llm_usage.json"), "w"))
+        print(f"[run] llm usage: {agent.llm.usage_totals}")
+    except Exception:
+        pass
     smi = subprocess.run(["nvidia-smi", "--query-gpu=index,memory.used",
                           "--format=csv,noheader"], capture_output=True, text=True).stdout
     print(f"[run] GPU memory now:\n{smi}")
