@@ -29,6 +29,8 @@ def parse_args():
     ap.add_argument("--rebuild-context", action="store_true")
     ap.add_argument("--supervised", action="store_true",
                     help="enable the acoustic supervisor loop (local MOSS active + Gemini shadow)")
+    ap.add_argument("--llm-url", default=None,
+                    help="override llm.base_url (e.g. http://127.0.0.1:8802/v1 for a model arm)")
     args = ap.parse_args()
     return args
 
