@@ -83,3 +83,6 @@ repo:
 
 supervisor:
   local_url: http://127.0.0.1:8809   # swarm/supervisor_server.py (MOSS-Audio-8B on GPU 2)
+  # S5 config (adopted after the dual-supervision experiment): Gemini directs,
+  # local MOSS is a score-only shadow rater (prompt-contamination fixed).
+  active: gemini

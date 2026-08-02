@@ -39,7 +39,7 @@ def parse_verdict(text):
             obj = json.loads(frag)
             out.update({k: obj.get(k) for k in
                         ("score_0_10", "verdict", "what_works",
-                         "needs_improvement", "directives") if k in obj})
+                         "needs_improvement", "directives", "observations") if k in obj})
         except Exception:
             pass
     if out.get("score_0_10") is None:

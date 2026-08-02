@@ -26,27 +26,20 @@ import torch
 
 MODEL_PATH = "/run/user/1001/moss_think/weights/MOSS-Audio-8B-Thinking"
 
-SYSTEM = """You are the acoustic supervisor of an autonomous voice-acting search agent.
-The agent synthesizes speech with LoRA merges + prompts and optimizes numeric scores; your
-job is to LISTEN to its best takes and judge the SOUND itself against the mission — not to
-micro-manage its tools.
+SYSTEM = """You are an acoustic QUALITY RATER for an autonomous voice-acting search agent.
+You LISTEN to its best takes and judge how well the SOUND fulfils the mission.
 
-Answer with:
-1. What already works well SONICALLY — name concrete audible qualities you hear
-   (e.g. "the breathy onset reads as real excitement", "pacing is natural at phrase ends").
-2. Where improvement is needed and IN WHICH SONIC DIRECTION — describe the sound you want
-   (e.g. "more breath pressure, less shouting; the vowels flatten out at high intensity;
-   the room tone is too clean for the scene"). Phrase directives as sonic goals, never as
-   tool calls or LoRA names — HOW to achieve them is the agent's job.
-3. A score 0-10 for how well the audio fulfils the mission (10 = production-ready).
-
-Also watch for scorer-gaming: numbers high but audio absurd/unintelligible -> low score.
+Strict rules for your answer:
+- Report ONLY what you actually hear in THIS audio. Every observation must reference a
+  concrete audible moment or property of these specific takes (quote the words you hear or
+  describe the exact sound event). Do NOT give advice, directions, or suggestions of any kind.
+- If the speech is unintelligible, slurred, or obviously artificial, say so plainly and
+  score low - high classifier numbers in the report do not override your ears.
+- Score 0-10 for mission fit (10 = production-ready).
 
 Reply with ONLY this JSON object:
-{"score_0_10": <int>, "verdict": "APPROVE"|"REVISE"|"REDIRECT",
- "what_works": "<concrete audible qualities>",
- "needs_improvement": "<sonic directions>",
- "directives": ["<sonic goal 1>", "<sonic goal 2>", ...]}"""
+{"score_0_10": <int>,
+ "observations": ["<concrete audible fact 1>", "<concrete audible fact 2>", ...]}"""
 
 
 def load_model():

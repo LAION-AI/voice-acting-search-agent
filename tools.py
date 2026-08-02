@@ -497,32 +497,39 @@ def t_supervisor_review(ctx, interpretation, top_sample_ids):
     }
     report_s = json.dumps(report, indent=1)
     audio_paths = [ctx.samples[sid]["path"] for sid in top_sample_ids]
+    active_name = ctx.cfg.get("supervisor", {}).get("active", "local")
     entry = {"t": time.time(), "gen": len(traj), "report": report,
-             "top_sample_ids": top_sample_ids}
-    local_v = None
+             "top_sample_ids": top_sample_ids, "active": active_name}
+    verdicts = {}
     for name, sup in ctx.supervisors.items():
         try:
             v = sup.verdict(report_s, getattr(ctx, "mission", ""), audio_paths)
         except Exception as ex:
             v = {"error": str(ex)[:250]}
         entry[name] = v
-        if name == "local":
-            local_v = v
+        verdicts[name] = v
     with open(f"{ctx.workdir}/supervisor_log.jsonl", "a") as f:
         f.write(json.dumps(entry, default=str) + "\n")
     ctx._sup_pending = False
-    if local_v is None:
-        return {"error": "no local supervisor verdict"}
-    if "error" in local_v:
-        return {"supervisor_error": local_v["error"],
+    active_v = verdicts.get(active_name)
+    if active_v is None or "error" in (active_v or {}):
+        # fall back to any working supervisor rather than flying blind
+        for name, v in verdicts.items():
+            if v and "error" not in v:
+                active_v = v
+                active_name = name
+                break
+    if active_v is None or "error" in (active_v or {}):
+        return {"supervisor_error": (active_v or {}).get("error", "no verdict"),
                 "note": "proceed with your own judgment this generation"}
-    return {"score_0_10": local_v.get("score_0_10"),
-            "verdict": local_v.get("verdict"),
-            "what_works": local_v.get("what_works"),
-            "needs_improvement": local_v.get("needs_improvement"),
-            "directives": local_v.get("directives"),
-            "note": "Directives are SONIC goals from a supervisor who listened to your top "
-                    "takes. Decide yourself how to realize them (LoRAs/prompt/sampling)."}
+    out = {"score_0_10": active_v.get("score_0_10"),
+           "verdict": active_v.get("verdict"),
+           "what_works": active_v.get("what_works"),
+           "needs_improvement": active_v.get("needs_improvement"),
+           "directives": active_v.get("directives"),
+           "note": "Directives are SONIC goals from a supervisor who listened to your top "
+                   "takes. Decide yourself how to realize them (LoRAs/prompt/sampling)."}
+    return {k: v for k, v in out.items() if v is not None}
 
 
 def t_spawn_subagent(ctx, task, budget=None):
