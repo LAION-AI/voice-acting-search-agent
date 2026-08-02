@@ -31,7 +31,10 @@ h1{font-size:26px;margin:0 0 6px}h2{font-size:18px;margin:0 0 4px}h3{font-size:1
 <p class=sub0>An autonomous agent (Gemma-4-12B QAT on vLLM, 38k-token conditioning manual in context, manifest-driven tool API)
 on a single A100-80GB with <code>MOSS-VA-v2</code> + the full scorer stack. Four missions, solved end-to-end without human help.</p>
 <p class=sub0>Repo: <a href="https://github.com/LAION-AI/voice-acting-search-agent">LAION-AI/voice-acting-search-agent</a> ·
-<a href="https://github.com/LAION-AI/voice-acting-search-agent/blob/main/SWARM_PLAN.md">SWARM plan</a> · raw logs under <code>results/</code>.</p>
+<a href="https://github.com/LAION-AI/voice-acting-search-agent/blob/main/SWARM_PLAN.md">SWARM plan</a> ·
+<a href="https://github.com/LAION-AI/voice-acting-search-agent/blob/main/REINTERPRETATION.md">🔁 Reinterpretation guide</a> (procedural recipe selection at scale, no LLM call) ·
+<a href="https://github.com/LAION-AI/voice-acting-search-agent/blob/main/COSTS.md">costs</a> ·
+<a href="https://github.com/LAION-AI/voice-acting-search-agent/blob/main/MODEL_COMPARISON.md">model comparison</a> · raw logs under <code>results/</code>.</p>
 <div class=banner>📊 <b>Methodology:</b> every strategy is evaluated as a <b>cohort of 8 samples</b>; all rankings on this page use the
 <b>cohort mean</b> (never a single lucky sample). Tables show per-cohort statistics — the same evidence a SWARM supervisor
 will receive. Audio players are fresh post-fix takes of each ranked recipe (regenerated after the doubled-audio engine bug was fixed; every file passes a self-repetition check), best-of-8 by the section's metric. Printed cohort statistics are from the original (pre-fix) runs — measured shift ≤0.06 per code.<br><br>
