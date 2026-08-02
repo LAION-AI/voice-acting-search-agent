@@ -47,7 +47,7 @@ Reply ONLY with JSON:
 """
 
 
-def hyprlab(content, max_tokens=1500):
+def hyprlab(content, max_tokens=6000):
     body = {"model": MODEL, "max_tokens": max_tokens,
             "messages": [{"role": "user", "content": content}]}
     req = urllib.request.Request(
