@@ -1,0 +1,124 @@
+{
+ "task_id": "T0002",
+ "exported_at": "2026-08-02T04:25:57Z",
+ "tool_calls_used": 26,
+ "fitness_trajectory": [
+  {
+   "best": 1.069,
+   "mean": 0.593
+  },
+  {
+   "best": 1.251,
+   "mean": 0.833
+  },
+  {
+   "best": 1.016,
+   "mean": 0.754
+  },
+  {
+   "best": 2.043,
+   "mean": 1.538
+  },
+  {
+   "best": 0.79,
+   "mean": 0.312
+  },
+  {
+   "best": 0.381,
+   "mean": 0.176
+  },
+  {
+   "best": 0.56,
+   "mean": 0.438
+  },
+  {
+   "best": 1.368,
+   "mean": 1.069
+  },
+  {
+   "best": 1.116,
+   "mean": 1.014
+  },
+  {
+   "best": 1.183,
+   "mean": 1.057
+  },
+  {
+   "best": 2.285,
+   "mean": 1.692
+  },
+  {
+   "best": 0.976,
+   "mean": 0.929
+  }
+ ],
+ "supervisor_rounds": [
+  {
+   "gen": 1,
+   "local": 5,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 2,
+   "local": 7,
+   "gemini": 5,
+   "directives": null
+  },
+  {
+   "gen": 3,
+   "local": 6,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 4,
+   "local": 7,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 5,
+   "local": 5,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 6,
+   "local": 2,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 7,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 8,
+   "local": 7,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 9,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 10,
+   "local": 7,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 11,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  }
+ ],
+ "final_report": "MISSION REPORT: Acting Edge-Case 'Tongue clicking during speech'.\n\nTRAJECTORY:\n1. Initial attempts focused on S_PLAY/S_CART LoRAs, which successfully triggered bursts but introduced 'fry' and cartoonish distortion.\n2. A 'Stability' phase using S_FORM and S_NARR anchors eliminated distortion and truncation, but also suppressed the target clicks entirely.\n3. An 'Aggressive' phase (TENS + S_PLAY high) triggered strong non-speech bursts (BLEND ~0.5) but led to severe truncation and raspy textures.\n4. The final 'Surgical' phase combined the S_FORM/S_NARR anchors (0.7) with a low-dose S_PLAY (0.4) and <tsk> tags to balance vocal grounding with percussive transients.\n\nWINNING RECIPE:\n- LoRAs: vn_S_NARR_high (0.7), vn_S_PLAY_high (0.4), vn_CLRT_high (0.5)\n- Prompt: GENERAL: (narrating naturally, punctuating with sharp, dry, percussive mouth pops <tsk>)\n- Text: 'I see what you mean. <tsk> It is a simple matter, <tsk> but it requires a steady hand.'\n- Sampling: temp=0.7, top_p=0.9, top_k=30, reference_id='ref01'\n\nFINAL ANALYSIS: The target effect is a delicate balance. High-strength percussive LoRAs (S_PLAY/S_CART) are necessary to trigger the clicks but easily destroy the 'grounded' voice. The most successful strategy is to use a strong Formal/Narrator anchor to 'clamp' the voice, while allowing a small amount of Playful energy to leak through as transients. Sample s0679 provides the best balance of full sentence delivery, plausible timbre, and potential for subtle mouth-ticking."
+}
