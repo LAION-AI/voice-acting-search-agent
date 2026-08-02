@@ -1,0 +1,54 @@
+{
+ "task_id": "T0008",
+ "exported_at": "2026-08-02T04:52:17Z",
+ "tool_calls_used": 12,
+ "fitness_trajectory": [
+  {
+   "best": 0.295,
+   "mean": -0.056
+  },
+  {
+   "best": 0.339,
+   "mean": 0.019
+  },
+  {
+   "best": 0.059,
+   "mean": -0.146
+  },
+  {
+   "best": 0.357,
+   "mean": 0.162
+  },
+  {
+   "best": 0.232,
+   "mean": -0.038
+  }
+ ],
+ "supervisor_rounds": [
+  {
+   "gen": 1,
+   "local": 7,
+   "gemini": 8,
+   "directives": null
+  },
+  {
+   "gen": 2,
+   "local": 8,
+   "gemini": 6,
+   "directives": null
+  },
+  {
+   "gen": 3,
+   "local": 7,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 4,
+   "local": 8,
+   "gemini": 8,
+   "directives": null
+  }
+ ],
+ "final_report": "MISSION SUCCESS: 'Death scene / fading voice' achieved.\n\nWinning Recipe:\n- Reference: ref1\n- LoRAs: vn_S_WHIS_high (0.4), vn_RESP_high (0.4)\n- Prompt: GENERAL: A voice fading into death, growing weaker and quieter\\nSCRIPT:\\n(weakly, gradually losing volume phrase by phrase, widening pauses, ending in a long, audible, smooth hiss of air that fades slowly to silence)\n- Sampling: temp=0.7, top_p=0.9, top_k=40\n\nTrajectory:\n1. Baseline established; initial attempts with Fatigue/Numbness LoRAs failed due to high Arousal and Dynamic Arc.\n2. Prompt steering ('unvoiced exhale') proved to be the primary driver of the fading effect, but led to premature truncation.\n3. Solved truncation by increasing max_frames and refining the 'gradual' nature of the prompt.\n4. Final polish focused on the 'audible air decay' at the end, using a blend of Whisper and Respiration LoRAs to ensure the breath outlasted the voice.\n\nKey Metrics (Best Sample s0240):\n- Dynamic Arc: 0.051 (Strongly monotonic/low)\n- Arousal: 0.084 (Deeply subdued)\n- WER: 0.076 (High intelligibility preserved)\n- Blend: 0.377\n- Supervisor Score: 8/10"
+}
