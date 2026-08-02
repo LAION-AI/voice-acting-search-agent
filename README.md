@@ -4,6 +4,8 @@
 
 ## 📚 Manuals & validated knowledge — start here
 
+> **🗂️ [Unified Manual & Studies hub](https://laion-ai.github.io/moss-voiceacting-manual/site/index.html)** — the single grouped overview of *everything* (conditioning manuals, audio studies, this agent, taxonomies, model repos), each entry with a one-line description and, where available, an agent-readable Markdown mirror. Start there if you're new.
+
 | resource | what's inside |
 |---|---|
 | 🔁 **[REINTERPRETATION.md](REINTERPRETATION.md)** | **Procedural recipe guide** — how to pick LoRAs + scales + prompt from a clip's scores *without an LLM call*, to reinterpret a large corpus (e.g. 1M DramaBox clips) at scale, incl. the LoRA hot-swap answer. |

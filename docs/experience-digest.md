@@ -36,3 +36,22 @@ climbing (T0005) · jump-scare bursts (T0006, engine truncation on burst-heavy p
   verify before discarding such takes.
 - MoE arm lost one final report to an LLM-400 context overflow (now guarded in
   `agent.py`).
+
+## Luna (gpt-5.6-luna API brain) — added Aug 2026
+
+The remote **gpt-5.6-luna** brain (via Hyprlab, no local LLM GPU) ran the same 4 single-dimension missions
+and, in the Gemini 4-arm judge, scored **9 / 9 / 10** — statistically tied with the local Gemma-4 31B
+(9/10/9) and clearly ahead of 12B (6/5/8) and MoE (7/8/7). It **independently reproduced the stabilizer
+adapters** and made good use of the aesthetics (ESTH) reward term. Measured cost: **$0.31 for all 4 missions**
+(2.83M input / 45k output tokens), i.e. ~$0.077/mission with the GPU free for the TTS engine.
+
+**Validated Luna recipes (cohort mean-of-8):**
+- **Audiobook narrator (a favourite):** `vn_S_STRY_high@0.65 + vn_ARSH_high@0.20 + vn_BRGT_low@0.20`
+  → S_STRY **0.998**, ESTH 0.590, WER **0.000**, ~11 s. High storytelling *and* pleasant to listen to.
+- Arousal-on-reference: `vn_DARC_high@0.85 + vn_ARSH_high@0.5` → AROU 0.48→0.78, WER 0.000.
+- Confirms the general rule: **the stabilizer pair `vn_ARSH_high` + `vn_BRGT`** (and `vn_S_NARR_high` for
+  storytelling) keeps WER near zero while pushing the target; the `(1−WER)` reward and a `+0.5·ESTH`
+  aesthetics term keep results intelligible *and* nice to hear.
+
+**Recommendation update:** a cheap fast **API brain is the default when online** (cents/task, no GPU); keep the
+local 31B (`google/gemma-4-31B-it-qat-w4a16-ct`) for air-gapped Jupiter runs. *Preliminary — one benchmark.*
