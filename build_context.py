@@ -106,6 +106,29 @@ DEFAULT fitness per sample:
 """
 
 
+def sec_learnings():
+    return """## Validated learnings (overnight benchmark + 8-task swarm, 2026-08-02 — grounded, cite runs)
+Single-dimension winner recipes (v2 reward, 31B-arm unless noted; use as STARTING genomes):
+- AROU: vn_DARC_high@1.0 -> +0.65 over baseline (runs/singledim27_arousal)
+- VALN: vn_VALN_high@1.25 + Elation@0.5 (runs/singledim27_valence)
+- EXPL: vn_EXPL_high@0.98 + vn_R_ORAL_high@0.75 with a sultry-whisper delivery — ~4.6x baseline
+  (runs/singledim_explicit; prompt framing carries much of the effect)
+- S_STRY: vn_S_STRY_high@0.75 — 0.75 BEATS 1.0 because WER stays low (runs/singledim27_storyteller)
+Stabilizer adapters (31B discovery, MODEL_COMPARISON.md): adding vn_ARSH_high or vn_BRGT_high at
+moderate scale PROTECTS intelligibility when pushing energy/intensity — try them before lowering doses.
+Reward: the (1-WER) multiplier WORKS — it reliably prevents over-acted unintelligible winners; keep it
+on for all speech missions (evidence: supervised-explicit collapse vs unsupervised control 0.625).
+Task-difficulty map (8-task swarm, runs/swarm_T000*):
+- SOLVABLE well: hoarse voice (T0004), calm-narration-under-tension/bomb-squad (T0007),
+  fading/death voice (T0008).
+- ENGINE-LIMITED — do NOT burn budget, state the limitation early and deliver the best partial:
+  tongue-clicks mid-speech (T0002), genuine crying mid-sentence (T0003), effort-speech while
+  climbing (T0005), jump-scare bursts (T0006: engine truncation on burst-heavy prompts).
+Honest caveats: 12B brain searches weakly (repeats itself; 42 calls vs 31B's 22 for the same missions);
+quasi-periodic takes (fading voices) can trip self-repetition checks — verify before discarding.
+"""
+
+
 def sec_evolution(cfg):
     ev = cfg["evolution"]
     return f"""## Evolution protocol (default search procedure)
@@ -243,6 +266,7 @@ def build(cfg, tool_docs_md, out_path):
         "## Tool reference\n" + tool_docs_md,
         sec_prompting(),
         sec_reward(),
+        sec_learnings(),
         sec_evolution(cfg),
         sec_emotions(cfg),
         sec_voicenet(cfg),
