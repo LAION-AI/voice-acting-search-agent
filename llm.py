@@ -60,13 +60,24 @@ class LLMClient:
             return json.loads(r.read())
 
     def healthy(self):
+        # External OpenAI-compatible APIs (Hyprlab etc.) require the auth header even on
+        # /models; a keyed request also covers vLLM (which just ignores the header).
+        headers = {}
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
         try:
-            req = urllib.request.Request(self.base_url + "/models")
+            req = urllib.request.Request(self.base_url + "/models", headers=headers)
             with urllib.request.urlopen(req, timeout=5) as r:
                 json.loads(r.read())
             return True
         except Exception:
-            return False
+            # Fall back to a 1-token chat probe: some gateways gate /models but serve
+            # /chat/completions, or pin a model not in the listing.
+            try:
+                self.chat([{"role": "user", "content": "ping"}], max_tokens=1)
+                return True
+            except Exception:
+                return False
 
     def chat(self, messages, temperature=None, max_tokens=None, json_schema=None):
         """messages: [{role, content}] -> assistant text.  If `json_schema` is given,
