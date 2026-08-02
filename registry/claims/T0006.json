@@ -1,0 +1,6 @@
+{
+ "task_id": "T0006",
+ "agent_id": "s5-worker-local",
+ "host": "single-node-a100x8",
+ "claimed_at": "2026-08-02T02:27:09Z"
+}

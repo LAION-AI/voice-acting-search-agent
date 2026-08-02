@@ -127,8 +127,25 @@ class Agent:
         try:
             return self.llm.chat(msgs, json_schema=TOOL_CALL_SCHEMA)
         except Exception:
+            pass
+        try:
             # structured-output path failed -> plain completion, parser handles it
             return self.llm.chat(msgs)
+        except Exception:
+            # LLM-400 guard (seen in the MoE arm's final-report turn): force-compress
+            # and retry; if it still fails, hard-truncate and ask for a SHORT reply.
+            self._compress()
+            msgs = [{"role": "system", "content": self._system()}] + self.messages
+            try:
+                return self.llm.chat(msgs, json_schema=TOOL_CALL_SCHEMA)
+            except Exception:
+                short = ([{"role": "system", "content": self._system()}]
+                         + self.messages[:1] + self.messages[-2:]
+                         + [{"role": "user", "content":
+                             "The context overflowed. Reply with ONE short JSON tool "
+                             "call; if you were finishing, call finish with a CONCISE "
+                             "report (<300 words)."}])
+                return self.llm.chat(short, max_tokens=1024)
 
     # ------------------------------------------------------------ main loop
     def run(self):
