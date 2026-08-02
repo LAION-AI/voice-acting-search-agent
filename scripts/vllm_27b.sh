@@ -11,7 +11,7 @@ export HF_HOME=/tmp/hf_cache HF_HUB_DISABLE_XET=1
 exec env CUDA_VISIBLE_DEVICES=$GPU python -m vllm.entrypoints.openai.api_server \
   --model google/gemma-4-31B-it-qat-w4a16-ct \
   --host 127.0.0.1 --port 8802 \
-  --gpu-memory-utilization 0.35 \
+  --gpu-memory-utilization 0.5 \
   --max-model-len 65536 \
   --max-num-seqs 16 \
   --enable-prefix-caching
