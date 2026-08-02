@@ -15,7 +15,7 @@ models:
   n_vq: 12
 
 llm:
-  model: google/gemma-4-12B-it-qat-w4a16-ct
+  model: google/gemma-4-31B-it-qat-w4a16-ct   # recommended default (preliminary); 12B = low-VRAM option
   base_url: http://127.0.0.1:8801/v1
   port: 8801
   gpu_memory_utilization: 0.90    # dedicated LLM GPU on the 4-GPU node

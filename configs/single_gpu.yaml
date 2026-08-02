@@ -9,7 +9,7 @@ models:
   n_vq: 12
 
 llm:
-  model: google/gemma-4-12B-it-qat-w4a16-ct   # official Google QAT w4a16 (compressed-tensors), vLLM-native
+  model: google/gemma-4-31B-it-qat-w4a16-ct   # RECOMMENDED default (preliminary, MODEL_COMPARISON.md); 12B = low-VRAM single-GPU option
   base_url: http://127.0.0.1:8801/v1
   port: 8801
   gpu_memory_utilization: 0.22                # leaves ~62GB for TTS + scorers on the same GPU

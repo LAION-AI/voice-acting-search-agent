@@ -38,27 +38,50 @@ The original experiment plan is in [PLAN.md](PLAN.md).
 | `build_context.py` | distills the live manuals + evolved genomes into `context/system_context.md` (~38k tokens) |
 | `run_agent.py` | CLI entry point |
 
-## LLM brain choice
+## LLM brain choice (RECOMMENDED DEFAULT — preliminary, one overnight benchmark)
 
-**`google/gemma-4-12B-it-qat-w4a16-ct`** — Google's official quantization-aware-trained
-w4a16 checkpoint in compressed-tensors format, natively supported by vLLM (tested on
-vLLM 0.26.0). Chosen over community AWQ/GPTQ quants (QAT ≥ post-hoc quant quality) and
-over Gemma-3-12B (newer generation, same ~8GB footprint). Fallback if unavailable:
-`google/gemma-3-12b-it` or `RedHatAI/gemma-3-12b-it-FP8-dynamic`.
-Served with `gpu_memory_utilization 0.22` and `max_model_len 65536` so the whole stack
-fits one 80GB GPU. The agent uses vLLM **structured output** (json_schema) so every
-tool call parses.
+**[`google/gemma-4-31B-it-qat-w4a16-ct`](https://huggingface.co/google/gemma-4-31B-it-qat-w4a16-ct)**
+— Google's official QAT w4a16 compressed-tensors checkpoint of the large dense Gemma-4,
+vLLM-native (~17GB weights). In our three-arm same-budget comparison
+([MODEL_COMPARISON.md](MODEL_COMPARISON.md), Gemini-judged, audio-inclusive) it won
+decisively: search-process 10 / result-quality 10 / report-clarity 9, solving the four
+single-dimension missions in 22 tool calls total vs 42 (12B) and 43 (MoE), independently
+discovering *stabilizer adapters* (`vn_ARSH_high`/`vn_BRGT_high` protect intelligibility
+at high energy) and holding near-zero WER. Measured serving: `:8802`,
+`gpu_memory_utilization 0.5` on an A100-80GB (~41GB incl. 64k KV) — an engine stack no
+longer co-resides comfortably; run workers on other GPUs against it (see
+`scripts/vllm_27b.sh`). *Preliminary: one overnight benchmark, n=4 missions per arm.*
+
+**Low-VRAM option:** `google/gemma-4-12B-it-qat-w4a16-ct` (~8GB weights, serves at
+`gpu_memory_utilization 0.22` so TTS + scorers fit on the SAME 80GB GPU — the original
+single-GPU deployment below). Weaker searcher (6/5/8 in the comparison) but fully
+functional. Both use vLLM **structured output** (json_schema) so every tool call parses.
 
 ## GPU memory budget (measured, A100-80GB single-GPU config)
 
 | component | GB |
 |---|---|
-| vLLM server (Gemma-4-12B w4a16 weights ~8 + 64k KV + CUDA graphs; hard cap 0.22×80) | 17.6 |
+| vLLM Gemma-4-12B w4a16 (single-GPU config: weights ~8 + 64k KV; cap 0.22×80) | 17.6 |
+| vLLM Gemma-4-**31B** w4a16 (recommended, own GPU: weights ~17 + 64k KV; util 0.5×80, measured :8802) | ~41 |
 | MOSS-VA-v2 bf16 + MOSS-Audio-Tokenizer-v2 (torch alloc after load) | 16.8 |
 | scorer stack (BUD-E-Whisper + 40 EmoNet experts, VoiceNet, VoiceCLAP, genu/blend MLPs) | 7.0 |
 | faster-whisper `small` (ct2 float16) + ECAPA (loaded lazily) | ~2 |
 | generation activations/KV, batch 8 × 384 frames (transient peak) | ~8-12 |
 | **total peak** | **~55 GB** (≈25 GB headroom) |
+
+## Supervisor recommendations (preliminary, from two measured experiments)
+
+- **ACTIVE director: Gemini (thinking) with audio input.** Its scores tracked the true
+  objective (r = 0.72 vs fitness in the per-generation experiment; S5 swarm: 74 dual
+  rounds, its critiques are specific and diagnostic).
+- **Local MOSS-Audio-8B: score-only shadow / coarse gate ONLY** (decontaminated rater
+  prompt, no directives). As an ACTIVE director it *hurt* the search — the supervised
+  control collapsed 0.417→0.114 fitness while the unsupervised twin climbed to 0.625
+  ([SUPERVISOR_COMPARISON.md](results/benchmark_expl/SUPERVISOR_COMPARISON.md)). Across
+  the S5 swarm it stayed lenient (mean 5.73 vs Gemini 3.66, r = 0.486 agreement).
+- Cost: the whole overnight program used ≈92 Gemini supervisor/judge calls ≈ **$1** at
+  official prices — see [COSTS.md](COSTS.md) for measured per-call tokens and
+  100/1000-task projections.
 
 ## Reward design (default)
 
