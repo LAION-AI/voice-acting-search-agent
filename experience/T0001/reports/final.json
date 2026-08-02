@@ -1,0 +1,134 @@
+{
+ "task_id": "T0001",
+ "exported_at": "2026-08-02T04:27:02Z",
+ "tool_calls_used": 27,
+ "fitness_trajectory": [
+  {
+   "best": 7.723,
+   "mean": 4.025
+  },
+  {
+   "best": 5.302,
+   "mean": 0.995
+  },
+  {
+   "best": 5.053,
+   "mean": 1.792
+  },
+  {
+   "best": 6.192,
+   "mean": 2.92
+  },
+  {
+   "best": 2.961,
+   "mean": 1.473
+  },
+  {
+   "best": 0.785,
+   "mean": 0.523
+  },
+  {
+   "best": 2.525,
+   "mean": 1.408
+  },
+  {
+   "best": 1.269,
+   "mean": 0.796
+  },
+  {
+   "best": 1.049,
+   "mean": 0.651
+  },
+  {
+   "best": 0.532,
+   "mean": 0.437
+  },
+  {
+   "best": 0.632,
+   "mean": 0.632
+  },
+  {
+   "best": 0.259,
+   "mean": 0.259
+  },
+  {
+   "best": 0.967,
+   "mean": 0.967
+  }
+ ],
+ "supervisor_rounds": [
+  {
+   "gen": 1,
+   "local": 7,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 2,
+   "local": 7,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 3,
+   "local": 7,
+   "gemini": 7,
+   "directives": null
+  },
+  {
+   "gen": 4,
+   "local": 7,
+   "gemini": 7,
+   "directives": null
+  },
+  {
+   "gen": 5,
+   "local": 7,
+   "gemini": 5,
+   "directives": null
+  },
+  {
+   "gen": 6,
+   "local": 7,
+   "gemini": 6,
+   "directives": null
+  },
+  {
+   "gen": 7,
+   "local": 7,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 8,
+   "local": 7,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 9,
+   "local": 7,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 10,
+   "local": 7,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 11,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 12,
+   "local": 7,
+   "gemini": 6,
+   "directives": null
+  }
+ ],
+ "final_report": "MISSION COMPLETE: 'Pretending angry while actually calm' (The Social Mask).\n\nFINAL WINNING RECIPE:\n- Genome: 'The Calculated Mask'\n- LoRA Merge: {vn_ATCK_high: 0.4, vn_S_CONV_high: 0.4, vn_SMTH_high: 0.6}\n- Prompt: GENERAL: 'Human projection with dynamic emphasis and smooth resonance. Biting attacks are preserved, but the delivery is fluid and calculated, hiding the calm pulse beneath a polished, loud surface.'\\nSCRIPT:\\n(projecting loudly and deliberately, sharp biting consonant attacks, fluid conversational cadence, smooth resonance, zero strain, steady unhurried breath)\n- Sampling: temp=0.7, top_p=0.9, top_k=25\n- Top Sample: s0669 (Fitness: 0.967, WER: 0.375)\n\nEVOLUTION TRAJECTORY:\n1. MANIC PHASE: Initial attempts used emotion/Triumph and vn_S_PLAY to achieve loudness, but resulted in high-pitched, 'cartoonish' manic energy that lacked the 'calm body' requirement.\n2. MUFFLE PHASE: Attempts to force a low-pitch monotone via vn_S_MONO and vn_S_FORM caused the audio to collapse into a muffled, unintelligible drone (WER > 0.8).\n3. MONSTER PHASE: Heavy LoRA stacking for projection created 'artificial/monstrous' timbres and heavy distortion, losing the natural human quality.\n4. HUMAN GROUNDING: Pivot to a prompt-driven approach with only a light dose of vn_ATCK_high (0.5) successfully restored a believable human tone and steady breath pace (Supervisor Score: 6/10).\n5. REFINEMENT: The final addition of vn_S_CONV (for fluid cadence) and vn_SMTH (to remove metallic grain) produced a 'calculated' projection that maintained the mismatch: loud surface, steady pulse.\n\nHALL-OF-FAME SAMPLES:\n- s0669: The refined 'Calculated Mask' (Balanced projection and stability).\n- s0660: The grounded human baseline (Natural tone, low tension).\n- s0649: The high-projection prototype (Maximum volume, high tension)."
+}
