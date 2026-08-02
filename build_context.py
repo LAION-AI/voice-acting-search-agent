@@ -103,6 +103,12 @@ DEFAULT fitness per sample:
   intentionally horrible/unnatural characters — but must never be absent by default.
 - run_generation implements this formula directly; per-sample WER comes from the 3-variant
   ASR. Watch the per-genome WER mean in results: >0.4 means the delivery is eating the words.
+- AESTHETICS you can (and often should) optimize: ESTH = VoiceNet Aesthetics ("nice to
+  listen to") and ENJOY = EIV-Plus content-enjoyment head (0-1). Both are first-class
+  fitness codes (e.g. maximize {AROU:1.5, ESTH:0.5} = "high arousal but pleasant").
+- SCENE DURATION: scene/edge-case missions target ~10-second takes — set max_frames~130
+  and fitness duration_target_s:[8,12] (soft multiplicative preference; keep speech
+  intelligible unless the mission is explicitly non-speech).
 """
 
 

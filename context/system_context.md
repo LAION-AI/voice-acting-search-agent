@@ -53,7 +53,7 @@ Persistent scratch notes. action='append' with text, or action='read'. Write fin
 Generate n no-LoRA samples for a text and store per-code baseline means. Required before fitness constraints with min='baseline'.
 
 ### run_generation(genomes: list, fitness: dict, n_per_genome?: int)
-Evaluate ONE evolution generation (batch merge+generate+score). genomes=[{loras:[{name,scale}], desc, cue, text, temp, top_p, top_k, reference_id?, seed?}], fitness={maximize:{code:w}|[codes], genu_weight?, blend_weight?, wer_multiplier?:true, constraints:[{code, min:'baseline'|num}]?}. DEFAULT reward = (sum w_i*target_i + w_g*GENU + w_b*BLEND) * (1-WER); w_g/w_b default to half the summed target weights each; the (1-WER) factor is mandatory unless the mission explicitly targets non-speech. Returns per-genome mean fitness (mean-of-n), per-code means incl. WER, best_sample_id, ranking.
+Evaluate ONE evolution generation (batch merge+generate+score). genomes=[{loras:[{name,scale}], desc, cue, text, temp, top_p, top_k, reference_id?, seed?}], fitness={maximize:{code:w}|[codes], genu_weight?, blend_weight?, wer_multiplier?:true, duration_target_s?:[8,12], constraints:[{code, min:'baseline'|num}]?}. DEFAULT reward = (sum w_i*target_i + w_g*GENU + w_b*BLEND) * (1-WER); w_g/w_b default to half the summed target weights each; the (1-WER) factor is mandatory unless the mission explicitly targets non-speech. Aesthetics codes usable everywhere: ESTH (VoiceNet aesthetics) and ENJOY (EIV-Plus content-enjoyment, 0-1). duration_target_s applies a soft multiplicative preference for takes inside the window. Returns per-genome mean fitness (mean-of-n), per-code means incl. WER, best_sample_id, ranking.
 
 ### supervisor_review(interpretation: str, top_sample_ids: list)
 Send your interpretation of the latest generation + the top-2/3 sample_ids to the acoustic supervisor (an audio-understanding model that LISTENS to the takes). Returns score_0_10 + sonic directives to incorporate next generation. Call after EVERY run_generation when the mission requires supervision; interpret your cohort results BEFORE calling.
@@ -113,6 +113,12 @@ DEFAULT fitness per sample:
   intentionally horrible/unnatural characters — but must never be absent by default.
 - run_generation implements this formula directly; per-sample WER comes from the 3-variant
   ASR. Watch the per-genome WER mean in results: >0.4 means the delivery is eating the words.
+- AESTHETICS you can (and often should) optimize: ESTH = VoiceNet Aesthetics ("nice to
+  listen to") and ENJOY = EIV-Plus content-enjoyment head (0-1). Both are first-class
+  fitness codes (e.g. maximize {AROU:1.5, ESTH:0.5} = "high arousal but pleasant").
+- SCENE DURATION: scene/edge-case missions target ~10-second takes — set max_frames~130
+  and fitness duration_target_s:[8,12] (soft multiplicative preference; keep speech
+  intelligible unless the mission is explicitly non-speech).
 
 
 ## Validated learnings (overnight benchmark + 8-task swarm, 2026-08-02 — grounded, cite runs)

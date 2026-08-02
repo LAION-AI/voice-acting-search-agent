@@ -76,6 +76,28 @@ class ScorerStack:
         self._asr = None
         self._asr_backend = None
 
+        # EIV-Plus content-enjoyment head (same FullEmbeddingMLP family as the 40
+        # emotion experts, laion/Empathic-Insight-Voice-Plus) -> score code ENJOY.
+        try:
+            from collections import OrderedDict
+            from huggingface_hub import hf_hub_download
+            import score_emotions as se_mod
+            pth = hf_hub_download("laion/Empathic-Insight-Voice-Plus",
+                                  "model_score_content_enjoyment_best.pth")
+            m = se_mod.FullEmbeddingMLP().to(device)
+            sd_ = torch.load(pth, map_location=device)
+            if any(k.startswith("_orig_mod.") for k in sd_):
+                sd_ = OrderedDict((k.replace("_orig_mod.", ""), v) for k, v in sd_.items())
+            m.load_state_dict(sd_)
+            m.eval()
+            m.half()
+            self.nns.emo_experts["score_content_enjoyment"] = m
+            self.has_enjoy = True
+            print("[scorers] ENJOY head loaded (EIV-Plus content enjoyment)")
+        except Exception as ex:
+            self.has_enjoy = False
+            print(f"[scorers] ENJOY head unavailable: {str(ex)[:120]}")
+
     # ---------------------------------------------------------------- 99-vec
     @torch.no_grad()
     def score_full(self, wav, sr):
@@ -112,7 +134,8 @@ class ScorerStack:
                 val = blend_raw
             vec[i] = sc._norm_slot(val, norm)
         return {"vec": vec, "emo_raw": emo_raw, "vn_raw": vn_raw,
-                "genu_raw": genu_raw, "blend_raw": blend_raw}
+                "genu_raw": genu_raw, "blend_raw": blend_raw,
+                "enjoy_raw": emo_raw.get("score_content_enjoyment")}
 
     def slot_value(self, vec, code):
         """Normalized value of a slot by code ('AROU', 'Fear', 'GENU', 'BLEND', ...)."""

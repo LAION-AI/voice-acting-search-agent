@@ -102,8 +102,15 @@ def main():
         if not local.healthy():
             print("[run] WARNING: local supervisor server not reachable "
                   "(swarm/supervisor_server.py on GPU2)", flush=True)
-        ctx.supervisors = {"local": local, "gemini": GeminiSupervisor()}
-        print("[run] supervisors: local MOSS (active) + Gemini (shadow)", flush=True)
+        backends = [b.strip() for b in os.environ.get(
+            "SUPERVISOR_BACKENDS", "local,gemini").split(",") if b.strip()]
+        sups = {}
+        if "local" in backends:
+            sups["local"] = local
+        if "gemini" in backends:
+            sups["gemini"] = GeminiSupervisor()
+        ctx.supervisors = sups
+        print(f"[run] supervisors: {list(sups)} (active={sup_cfg.get('active','local')})", flush=True)
 
     def refresh_context():
         info = BC.build(cfg, tool_docs(), ctx_path)

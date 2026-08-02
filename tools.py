@@ -64,6 +64,8 @@ class ToolContext:
                            "vn_raw": {k: round(float(v), 4) for k, v in fs["vn_raw"].items()},
                            "genu_raw": round(float(fs["genu_raw"]), 4),
                            "blend_raw": round(float(fs["blend_raw"]), 4)}
+            if fs.get("enjoy_raw") is not None:  # EIV-Plus content enjoyment, /5 -> [0,1]
+                s["scores"]["enjoy"] = round(min(1.0, max(0.0, float(fs["enjoy_raw"]) / 5.0)), 4)
         return s["scores"]
 
     def slot(self, sid, code):
@@ -85,7 +87,7 @@ def _summary_row(ctx, sid, metrics):
     for m in metrics or []:
         if m in ("GENU", "BLEND", "QUALITY"):
             continue
-        row[m] = _r(ctx.scorers.slot_value(vec, m))
+        row[m] = _r(_code_value(ctx, vec, m, sid))
     return row
 
 
@@ -302,6 +304,10 @@ def t_compute_baseline(ctx, text, instruction="", n=8, reference_id=None):
         base = {s["code"]: _r(mean[s["slot"]]) for s in ctx.scorers.layout["slots"]
                 if s["block"] in ("emotion", "voicenet")}
         base["GENU"] = _r(mean[97]); base["BLEND"] = _r(mean[98])
+        enj = [ctx.samples[s_]["scores"].get("enjoy") for s_ in sids]
+        enj = [e for e in enj if e is not None]
+        if enj:
+            base["ENJOY"] = _r(np.mean(enj))
         base["QUALITY"] = _r((base["RCQL"] + base["ESTH"]) / 2)
         ctx.baseline = base
         json.dump(base, open(f"{ctx.workdir}/baseline.json", "w"))
@@ -326,6 +332,15 @@ def sample_wer(ctx, sid):
     return s["wer"]
 
 
+def _code_value(ctx, vec, code, sid=None):
+    """Slot value; special-cases ENJOY (EIV-Plus head, stored per sample, [0,1])."""
+    if code == "ENJOY":
+        if sid is not None:
+            return float(ctx.samples[sid].get("scores", {}).get("enjoy", 0.0) or 0.0)
+        return 0.0
+    return ctx.scorers.slot_value(vec, code)
+
+
 def _fitness_of(ctx, vec, fitness, sid=None):
     """DEFAULT reward (see system context 'Reward design'):
         ( sum_i w_i*norm(target_i) + w_g*norm(GENU) + w_b*norm(BLEND) ) * (1 - WER)
@@ -337,7 +352,7 @@ def _fitness_of(ctx, vec, fitness, sid=None):
     tgt = fitness.get("maximize", {})
     if isinstance(tgt, list):
         tgt = {c: 1.0 for c in tgt}
-    vals = {c: ctx.scorers.slot_value(vec, c) for c in tgt}
+    vals = {c: _code_value(ctx, vec, c, sid) for c in tgt}
     tgt_w_sum = float(sum(tgt.values())) or 1.0
     w_g = float(fitness.get("genu_weight", tgt_w_sum / 2.0))
     w_b = float(fitness.get("blend_weight", tgt_w_sum / 2.0))
@@ -352,6 +367,13 @@ def _fitness_of(ctx, vec, fitness, sid=None):
         wer = sample_wer(ctx, sid)
         detail["WER"] = wer
         score *= (1.0 - wer)
+    dt = fitness.get("duration_target_s")
+    if dt and sid is not None:  # soft preference, e.g. [8,12] for ~10s scene takes
+        lo, hi = float(dt[0]), float(dt[1])
+        dur = float(ctx.samples[sid].get("dur", 0.0))
+        factor = max(0.5, 1.0 - 0.04 * max(0.0, lo - dur) - 0.04 * max(0.0, dur - hi))
+        detail["DUR_FACTOR"] = round(factor, 3)
+        score *= factor
     penalty = 0.0
     pen_w = float(fitness.get("penalty", 2.0))
     for c in fitness.get("constraints", []):
@@ -361,7 +383,7 @@ def _fitness_of(ctx, vec, fitness, sid=None):
             if ctx.baseline is None:
                 raise ValueError("constraint min='baseline' but compute_baseline was never called")
             mn = ctx.baseline[code]
-        v = ctx.scorers.slot_value(vec, code)
+        v = _code_value(ctx, vec, code, sid)
         detail[code] = v
         penalty += max(0.0, float(mn) - v) * pen_w
     return score - penalty, detail
@@ -683,11 +705,14 @@ TOOLS = {
         "desc": "Evaluate ONE evolution generation (batch merge+generate+score). "
                 "genomes=[{loras:[{name,scale}], desc, cue, text, temp, top_p, top_k, "
                 "reference_id?, seed?}], fitness={maximize:{code:w}|[codes], "
-                "genu_weight?, blend_weight?, wer_multiplier?:true, "
+                "genu_weight?, blend_weight?, wer_multiplier?:true, duration_target_s?:[8,12], "
                 "constraints:[{code, min:'baseline'|num}]?}. DEFAULT reward = "
                 "(sum w_i*target_i + w_g*GENU + w_b*BLEND) * (1-WER); w_g/w_b default to "
                 "half the summed target weights each; the (1-WER) factor is mandatory "
                 "unless the mission explicitly targets non-speech. "
+                "Aesthetics codes usable everywhere: ESTH (VoiceNet aesthetics) and ENJOY "
+                "(EIV-Plus content-enjoyment, 0-1). duration_target_s applies a soft "
+                "multiplicative preference for takes inside the window. "
                 "Returns per-genome mean fitness (mean-of-n), per-code means incl. WER, best_sample_id, ranking.",
         "params": {"genomes": {"type": list, "required": True},
                    "fitness": {"type": dict, "required": True},
