@@ -1,0 +1,90 @@
+{
+ "task_id": "T0004",
+ "exported_at": "2026-08-02T04:09:35Z",
+ "tool_calls_used": 20,
+ "fitness_trajectory": [
+  {
+   "best": 1.265,
+   "mean": 0.411
+  },
+  {
+   "best": 0.827,
+   "mean": 0.326
+  },
+  {
+   "best": 0.635,
+   "mean": 0.319
+  },
+  {
+   "best": 0.409,
+   "mean": 0.26
+  },
+  {
+   "best": 0.623,
+   "mean": 0.458
+  },
+  {
+   "best": 0.488,
+   "mean": 0.299
+  },
+  {
+   "best": 0.316,
+   "mean": 0.103
+  },
+  {
+   "best": 0.281,
+   "mean": 0.083
+  }
+ ],
+ "supervisor_rounds": [
+  {
+   "gen": 1,
+   "local": 7,
+   "gemini": 7,
+   "directives": null
+  },
+  {
+   "gen": 2,
+   "local": 8,
+   "gemini": 6,
+   "directives": null
+  },
+  {
+   "gen": 3,
+   "local": 7,
+   "gemini": 0,
+   "directives": null
+  },
+  {
+   "gen": 4,
+   "local": 8,
+   "gemini": 8,
+   "directives": null
+  },
+  {
+   "gen": 5,
+   "local": 7,
+   "gemini": 5,
+   "directives": null
+  },
+  {
+   "gen": 6,
+   "local": 7,
+   "gemini": 5,
+   "directives": null
+  },
+  {
+   "gen": 7,
+   "local": 7,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 8,
+   "local": 5,
+   "gemini": 9,
+   "directives": null
+  }
+ ],
+ "final_report": "MISSION ACCOMPLISHED: ACTING EDGE-CASE 'Hoarse voice'.\n\nFINAL RECIPE:\n- Base: char_genuine/gravelled-veteran-baritone (scale 1.0)\n- VoiceNet Modifiers: vn_HARM_low (scale 1.2), vn_ROUG_high (scale 1.0)\n- Prompt: '(broken harmonicity, severe glottal friction, gravelly rasp, pushing through a damaged larynx, NO SMOOTHNESS)'\n- Sampling: temp 0.8, top_p 0.9, top_k 40\n- Reference: ref3.wav (cloned)\n\nTRAJECTORY:\n1. Initial attempts with generic VoiceNet ROUG/TENS failed due to a 'whisper fallback' (unvoiced air instead of voiced grit).\n2. Pivoted to Character LoRAs (gravelly-sinister/veteran) to provide a structural base for grit, which improved emotional pacing but remained too 'clean' for the supervisor.\n3. Attempted extreme 'Shattering' (S_AUTH/S_DRAM + ROUG 0.8), which moved the voice to 'voiced strain' but destroyed intelligibility (WER > 0.8).\n4. Final breakthrough achieved by combining the 'Gravelled-Veteran' base with high-dose Harmonicity breaking (1.2) and Roughness (1.0), which created a 'broken instrument' texture that remained intelligible. This resulted in a supervisor score of 9/10.\n\nKEY FINDING: For 'damaged' voices, character LoRAs are essential to prevent the model from defaulting to a simple whisper. The 'bruised' effect is best realized by explicitly breaking harmonicity (HARM_low) rather than just adding noise (ROUG_high)."
+}

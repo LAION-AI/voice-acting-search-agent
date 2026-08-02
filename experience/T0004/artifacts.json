@@ -1,0 +1,17 @@
+{
+ "hf_repo": "TTS-AGI/voice-acting-swarm-artifacts",
+ "paths": [
+  "tasks/T0004/baseline.json",
+  "tasks/T0004/evolution_log.jsonl",
+  "tasks/T0004/hall_of_fame/s0438.json",
+  "tasks/T0004/hall_of_fame/s0438.wav",
+  "tasks/T0004/hall_of_fame/s0456.json",
+  "tasks/T0004/hall_of_fame/s0456.wav",
+  "tasks/T0004/hall_of_fame/s0475.json",
+  "tasks/T0004/hall_of_fame/s0475.wav",
+  "tasks/T0004/report.md",
+  "tasks/T0004/result.json",
+  "tasks/T0004/supervisor_log.jsonl",
+  "tasks/T0004/transcript.jsonl"
+ ]
+}
