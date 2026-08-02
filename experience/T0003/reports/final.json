@@ -1,0 +1,124 @@
+{
+ "task_id": "T0003",
+ "exported_at": "2026-08-02T04:19:42Z",
+ "tool_calls_used": 26,
+ "fitness_trajectory": [
+  {
+   "best": 2.061,
+   "mean": 0.097
+  },
+  {
+   "best": 0.426,
+   "mean": -0.149
+  },
+  {
+   "best": 1.742,
+   "mean": 1.032
+  },
+  {
+   "best": 1.612,
+   "mean": 1.143
+  },
+  {
+   "best": 2.668,
+   "mean": 2.014
+  },
+  {
+   "best": 3.032,
+   "mean": 2.636
+  },
+  {
+   "best": 3.821,
+   "mean": 3.181
+  },
+  {
+   "best": 4.856,
+   "mean": 3.398
+  },
+  {
+   "best": 3.536,
+   "mean": 3.003
+  },
+  {
+   "best": 4.428,
+   "mean": 3.572
+  },
+  {
+   "best": 5.641,
+   "mean": 4.014
+  },
+  {
+   "best": 3.587,
+   "mean": 3.587
+  }
+ ],
+ "supervisor_rounds": [
+  {
+   "gen": 1,
+   "local": 0,
+   "gemini": 1,
+   "directives": null
+  },
+  {
+   "gen": 2,
+   "local": 2,
+   "gemini": 1,
+   "directives": null
+  },
+  {
+   "gen": 3,
+   "local": 2,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 4,
+   "local": 5,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 5,
+   "local": 4,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 6,
+   "local": 4,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 7,
+   "local": 6,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 8,
+   "local": 5,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 9,
+   "local": 2,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 10,
+   "local": 7,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 11,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  }
+ ],
+ "final_report": "MISSION REPORT: Breaking down mid-eulogy\n\n1. Final Recipe:\n- Reference: ref0 (Long-phrased cinematic)\n- LoRA Merge: vn_S_FORM_high (0.8), Sadness (0.8), vn_RESP_high (1.0), vn_S_WHIS_high (0.8)\n- Prompt: '(Resonant formal projection for the first half then a sudden violent vocal crack into sobbing followed by a long trembling gasp for air and ending in a tiny fragile hushed whisper)'\n- Text: 'He was a man of unwavering strength a man who taught us that love is the only thing that lasts I just cannot go on love is all we have left' (no punctuation to avoid early EOS)\n- Sampling: temp 0.9, top_p 0.9, max_frames 1200\n\n2. Trajectory:\n- Gen 0-3: Focused on S_FORM and Sadness. Encountered severe truncation at ~2 seconds.\n- Gen 4-6: Attempted to solve truncation via punctuation removal and temperature increases (1.2). Successfully extended length but introduced 'squeaky' synthetic artifacts due to high LoRA scales.\n- Gen 7-8: Stabilized quality by lowering temperature (0.5) and scaling back LoRAs. Recovered S_FORM and BLEND, but the specific 'crack-pause-recovery' arc remained elusive as the model tended to either be too stable or too chaotic.\n- Final Attempt: Integrated ref0 to leverage long-phrasing bias and removed all punctuation. Achieved the best balance of formal resonance and emotional blend (s0700).\n\n3. Technical Constraints:\nThe 'truncation wall' was the primary obstacle. The model consistently predicted EOS tokens immediately following the first phrase of the eulogy, regardless of frame budget or prompt. The most successful takes (s0680, s0660) captured the emotional 'flavor' of the breakdown, but the full temporal arc was limited by the model's internal sequence length preferences for this specific emotional profile."
+}
