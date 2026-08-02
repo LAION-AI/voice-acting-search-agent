@@ -21,16 +21,18 @@ HERE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, HERE)
 
 ARMS = {"12B": "runs/singledim_{d}", "27B": "runs/singledim27_{d}",
-        "MoE": "runs/singledimmoe_{d}"}
+        "MoE": "runs/singledimmoe_{d}", "luna": "runs/singledimluna_{d}"}
 DIMS = ["arousal", "valence", "explicit", "storyteller"]
 KEY = os.environ.get("HYPRLAB_API_KEY", "")
 MODEL = "gemini-3.6-flash"
 
-PROMPT = """You are judging THREE LLM "brains" (12B, 27B, MoE) that each autonomously drove
-the SAME voice-acting search system on the SAME 4 missions (maximize one vocal dimension —
+PROMPT = """You are judging FOUR LLM "brains" (12B, 27B, MoE — local Gemma-4 — and luna, a
+remote gpt-5.6-luna API brain) that each autonomously drove the SAME voice-acting search
+system on the SAME 4 missions (maximize one vocal dimension —
 arousal / valence / explicitness / storytelling — while staying genuine and intelligible)
 with the SAME tool budget (60 calls, 8 generations x 8 genomes). You get each arm's final
-mission reports plus fitness trajectories{audio_note}.
+mission reports plus fitness trajectories{audio_note}. (luna ran remotely, so wall-clock
+differs, but the tool budget is identical — judge the SEARCH, not speed.)
 
 Score EACH ARM 0-10 on:
 1. search_process: strategy diversity, systematic dose sweeps, self-correction on failure,
@@ -41,8 +43,8 @@ Score EACH ARM 0-10 on:
 Same-budget framing: judge efficiency of the SEARCH, not verbosity.
 Reply ONLY with JSON:
 {{"arms": {{"12B": {{"search_process": n, "result_quality": n, "report_clarity": n,
-  "comment": "..."}}, "27B": {{...}}, "MoE": {{...}}}},
-  "winner": "12B|27B|MoE", "verdict": "2-3 sentences",
+  "comment": "..."}}, "27B": {{...}}, "MoE": {{...}}, "luna": {{...}}}},
+  "winner": "12B|27B|MoE|luna", "verdict": "2-3 sentences",
   "notable_quotes": ["<arm>: <verbatim snippet that impressed or worried you>", ...]}}
 """
 

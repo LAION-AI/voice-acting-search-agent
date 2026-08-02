@@ -97,3 +97,24 @@ vLLM slice of an A100 for ~1–2h (≈$1.5–4 at common rental rates), and cach
 benchmarked as the brain yet (worth one arm-run: `scripts/run_arm.sh` against any
 OpenAI-compatible endpoint); (b) offline/air-gapped deployments (Jupiter) still need the
 local brain. The local 31B remains the recommended default until an API arm is judged.
+
+## Measured: gpt-5.6-luna API brain — 4 single-dim missions (2026-08-02)
+
+Actual token usage captured from `runs/singledimluna_*/llm_usage.json` (Hyprlab `gpt-5.6-luna`,
+$0.10/M input, $0.60/M output, ≤272k tier):
+
+| mission | calls | input tok | output tok | $ |
+|---|---|---|---|---|
+| arousal | 13 | 587,284 | 10,251 | $0.065 |
+| valence | 17 | 774,000 | 12,295 | $0.085 |
+| explicit | 17 | 773,536 | 11,736 | $0.084 |
+| storyteller | 15 | 693,273 | 10,828 | $0.076 |
+| **total (4 missions)** | **62** | **2,828,093** | **45,110** | **≈ $0.31** |
+
+≈ **$0.077 per 8-generation mission** with NO local LLM GPU. In the 4-arm Gemini judge
+([MODEL_COMPARISON.md](MODEL_COMPARISON.md)) luna scored **9 / 9 / 10** — statistically tied with the
+local 31B (9/10/9) and clearly ahead of 12B/MoE — while costing cents and freeing the GPU entirely for
+the TTS engine. It independently used both the stabilizer adapters AND the aesthetics (ESTH) term
+(e.g. storytelling `vn_S_STRY_high@0.65 + vn_ARSH_high@0.20 + vn_BRGT_low@0.20` → S_STRY 0.998, ESTH 0.590,
+WER 0.000, 10.96 s). **Preliminary conclusion: a cheap fast API brain is the recommended default when
+online; keep local 31B for air-gapped Jupiter runs.**
