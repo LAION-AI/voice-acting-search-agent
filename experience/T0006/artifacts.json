@@ -1,0 +1,11 @@
+{
+ "hf_repo": "TTS-AGI/voice-acting-swarm-artifacts",
+ "paths": [
+  "tasks/T0006/baseline.json",
+  "tasks/T0006/evolution_log.jsonl",
+  "tasks/T0006/report.md",
+  "tasks/T0006/result.json",
+  "tasks/T0006/supervisor_log.jsonl",
+  "tasks/T0006/transcript.jsonl"
+ ]
+}

@@ -1,0 +1,130 @@
+{
+ "task_id": "T0006",
+ "exported_at": "2026-08-02T04:23:46Z",
+ "tool_calls_used": 27,
+ "fitness_trajectory": [
+  {
+   "best": 4.312,
+   "mean": 3.833
+  },
+  {
+   "best": 4.394,
+   "mean": 3.781
+  },
+  {
+   "best": 4.1,
+   "mean": 3.823
+  },
+  {
+   "best": 3.234,
+   "mean": 2.723
+  },
+  {
+   "best": 3.0,
+   "mean": 2.777
+  },
+  {
+   "best": 3.151,
+   "mean": 3.089
+  },
+  {
+   "best": 3.362,
+   "mean": 2.924
+  },
+  {
+   "best": 3.019,
+   "mean": 2.731
+  },
+  {
+   "best": 2.817,
+   "mean": 2.461
+  },
+  {
+   "best": 3.358,
+   "mean": 3.057
+  },
+  {
+   "best": 3.104,
+   "mean": 2.878
+  },
+  {
+   "best": 2.793,
+   "mean": 2.793
+  }
+ ],
+ "supervisor_rounds": [
+  {
+   "gen": 1,
+   "local": 6,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 2,
+   "local": 2,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 3,
+   "local": 4,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 4,
+   "local": 5,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 5,
+   "local": 3,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 6,
+   "local": 2,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 7,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 8,
+   "local": 2,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 9,
+   "local": 5,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 10,
+   "local": 2,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 11,
+   "local": 0,
+   "gemini": 1,
+   "directives": null
+  },
+  {
+   "gen": 12,
+   "local": 0,
+   "gemini": 1,
+   "directives": null
+  }
+ ],
+ "final_report": "MISSION REPORT: Jump-scare / sudden appearance (Consciousness, Shock & Altered States).\n\nFINAL STATUS: Partial Success / Technical Failure.\n\nSUMMARY:\nTargeted a complex four-stage arc: [Involuntary Gasp] -> [Silence] -> [Shaky Recovery] -> [Nervous Laugh]. While the individual components (explosive gasp and shaky recovery) were achieved in isolation, the model struggled to maintain synthesis stability across the full sequence, frequently resulting in either premature truncation or digital corruption (broadband static).\n\nBEST GENOMES:\n1. 'The Trembling Recovery' (S0529): Best overall narrative arc completion, though the initial shock was under-powered.\n2. 'Hybrid-Shatter v1' (S0610): Best explosive, visceral onset, but failed to sustain the recovery speech.\n3. 'Clean-Shatter Final' (S0673): Best synthesis stability and breath-seize texture, though truncated.\n\nWINNING STABILITY RECIPE:\n- LoRAs: vn_VULN_high (0.8), vn_RESP_high (0.8), vn_S_WHIS_high (0.5)\n- Sampling: temp 0.6, top_p 0.8, top_k 25\n- Prompt: 'A sudden, violent, non-vocalized gasp of shock, followed by a beat of silence, then a fragile, shaking recovery ending in a nervous laugh.'\n\nHALL-OF-FAME SAMPLES:\n- s0529: Most complete narrative arc.\n- s0610: Most visceral jump-scare onset.\n- s0673: Cleanest breath-seize texture.\n\nTECHNICAL FINDINGS:\n- High-intensity onset LoRAs (ARSH/ATCK) are highly prone to causing synthesis collapse (digital buzzing/static) when combined with reference voices of high resonance (ref5).\n- The 'silence' beat in the script often triggers early truncation in the generator, suggesting a limitation in the model's ability to handle extended non-speech pauses within a single generation window."
+}
