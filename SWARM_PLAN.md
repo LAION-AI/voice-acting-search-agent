@@ -210,11 +210,11 @@ Termination: `score_0_10 ≥ 9` (or ≥ 7 at budget end) → REVIEW→CLOSED; el
 
 ### 3.3 Supervisor backends (pluggable, `configs/supervisor.yaml`)
 
-| backend | reach | notes |
-|---|---|---|
-| `gemini-hyprlab` | text-only report | `base_url https://api.hyprlab.io`, model `gemini-3.6-flash`; **known gotchas:** needs `max_output_tokens ≥ 300`; `thinking_config` → 400 on Hyprlab (omit; use `-pro`/thinking on the standard API instead) |
-| `gemini-standard` | text + **audio** | Gemini 3.6 Pro w/ thinking; can receive the top-3 mp3s inline → true listening judgment |
-| `local-audio-lm` | text + **audio**, fully offline | MOSS-Audio-8B-Thinking (or similar audio-understanding LM) on a swarm GPU — required for air-gapped Jupiter runs |
+| backend | reach | notes | **empirical verdict (overnight 2026-08-02, 89 dual rounds)** |
+|---|---|---|---|
+| `gemini-hyprlab` | text-only report | `base_url https://api.hyprlab.io`, model `gemini-3.6-flash`; **known gotchas:** needs `max_output_tokens ≥ 300`; `thinking_config` → 400 on Hyprlab (omit; use `-pro`/thinking on the standard API instead) | works; audio also accepted in practice — used as the ACTIVE director in S5, ~$0.007/call (COSTS.md) |
+| `gemini-standard` | text + **audio** | Gemini 3.6 w/ thinking; can receive the top mp3s inline → true listening judgment | **best judge**: fitness-tracking r=0.72 vs local 0.46; critiques specific and diagnostic — RECOMMENDED active supervisor |
+| `local-audio-lm` | text + **audio**, fully offline | MOSS-Audio-8B-Thinking (or similar audio-understanding LM) on a swarm GPU — required for air-gapped Jupiter runs | **do NOT let it direct**: as active supervisor it collapsed a search (0.417→0.114 vs control 0.625, prompt-contaminated generic directives). Usable as decontaminated score-only gate (reliable at extremes; S5 r=0.486, lenient mean 5.73 vs 3.66) |
 
 The worker attaches the top-2/3 mp3 artifacts whenever the backend supports audio input; scoring by
 *listening* beats scoring by numbers alone and catches scorer-gaming (high EmoNet score, absurd audio).
@@ -316,12 +316,12 @@ a 12-node allocation ≈ 36 concurrent tasks.
 
 | step | deliverable | est. effort |
 |---|---|---|
-| S1 | `registry/` + `experience/` scaffolding, TASK.md schema, claim/heartbeat lib (`swarm/registry.py`) | S |
-| S2 | report generator in the agent loop (compressed schema §3.1) + `swarm/supervisor.py` with the 3 backends + verdict injection | M |
+| S1 | `registry/` + `experience/` scaffolding, TASK.md schema, claim/heartbeat lib (`swarm/registry.py`) | S — registry/tasks + claims + experience/ exports **used in production** (heartbeat lib pending) |
+| S2 | report generator in the agent loop (compressed schema §3.1) + `swarm/supervisor.py` with the 3 backends + verdict injection | M — **VALIDATED IN PRODUCTION** (89 dual rounds, S5) |
 | S3 | worker daemon `run_worker.py`: claim→(resume?)→evolve→report→sync loop, kill-safe | M |
-| S4 | HF artifact uploader + `artifacts.json` (idempotent) | S |
+| S4 | HF artifact uploader + `artifacts.json` (idempotent) | S — **VALIDATED IN PRODUCTION** (8 tasks → TTS-AGI/voice-acting-swarm-artifacts) |
 | S5 | tag-filtered manual loader in `build_context.py` + sparse-checkout sync | S |
-| S6 | manifest-driven tools (`registry/tools.json`, `ToolModelPool` lazy/TTL) **+ sidon_enhance + audio_stretch** | M |
+| S6 | manifest-driven tools (`registry/tools.json`, `ToolModelPool` lazy/TTL) **+ sidon_enhance + audio_stretch** | M — **VALIDATED IN PRODUCTION** (incl. sidon fidelity guard) |
 | S7 | `swarm/consolidate.py` (frontier-model distillation, candidates gate) | M |
 | S8 | orchestrator v1 (seed/monitor/reopen/dashboard) + 4-GPU single-node swarm test (3 workers) | M |
 | S9 | Jupiter: sbatch array, offline model cache manifest, air-gapped supervisor (local audio LM) | M |
