@@ -1,0 +1,134 @@
+{
+ "task_id": "T0005",
+ "exported_at": "2026-08-02T04:24:50Z",
+ "tool_calls_used": 27,
+ "fitness_trajectory": [
+  {
+   "best": 4.923,
+   "mean": 4.337
+  },
+  {
+   "best": 4.447,
+   "mean": 3.939
+  },
+  {
+   "best": 4.223,
+   "mean": 4.029
+  },
+  {
+   "best": 3.649,
+   "mean": 3.425
+  },
+  {
+   "best": 3.78,
+   "mean": 2.852
+  },
+  {
+   "best": 3.934,
+   "mean": 3.668
+  },
+  {
+   "best": 3.82,
+   "mean": 3.562
+  },
+  {
+   "best": 4.258,
+   "mean": 4.024
+  },
+  {
+   "best": 5.007,
+   "mean": 4.532
+  },
+  {
+   "best": 4.38,
+   "mean": 4.07
+  },
+  {
+   "best": 4.344,
+   "mean": 4.127
+  },
+  {
+   "best": 4.337,
+   "mean": 3.973
+  },
+  {
+   "best": 4.961,
+   "mean": 4.468
+  }
+ ],
+ "supervisor_rounds": [
+  {
+   "gen": 1,
+   "local": 5,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 2,
+   "local": 7,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 3,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 4,
+   "local": 6,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 5,
+   "local": 7,
+   "gemini": 6,
+   "directives": null
+  },
+  {
+   "gen": 6,
+   "local": 6,
+   "gemini": 4,
+   "directives": null
+  },
+  {
+   "gen": 7,
+   "local": 6,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 8,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  },
+  {
+   "gen": 9,
+   "local": 3,
+   "gemini": 1,
+   "directives": null
+  },
+  {
+   "gen": 10,
+   "local": 8,
+   "gemini": 3,
+   "directives": null
+  },
+  {
+   "gen": 11,
+   "local": 5,
+   "gemini": 1,
+   "directives": null
+  },
+  {
+   "gen": 12,
+   "local": 7,
+   "gemini": 2,
+   "directives": null
+  }
+ ],
+ "final_report": "MISSION COMPLETE: 'Speaking while climbing' (Physical Exertion & Environment).\n\nFINAL WINNING RECIPE:\n- LoRAs: emotion_Fatigue_Exhaustion (1.2), vn_RESP_high (0.8), vn_TENS_high (0.3)\n- Prompt: 'compressed vocal delivery, visceral weight-bearing grunts, sharp inhaled resets, low volume'\n- Script: 'One more reach <gasp> just one more <grunt> almost there <grunt> just gotta get a grip <gasp> on this ledge. Steady now.'\n- Sampling: temp=0.9, top_p=0.95, top_k=50\n\nKEY FINDINGS:\n- Resonance vs. Exertion: High chest resonance (vn_R_CHST_high) tended to trigger 'theatrical shouting' and repetitive loops. Shifting the focus to 'air-starvation' via emotion_Fatigue_Exhaustion and vn_RESP_high produced a more realistic, compressed vocal tract.\n- Burst Integration: Placing burst tags (<gasp>, <grunt>) directly inside the script text was critical for breaking repetitive patterns and forcing the model to interleave speech with physical effort.\n- Signal Stability: High-pitch modifiers (vn_GEND_high) caused catastrophic failure (whistling artifacts). Low temperature (0.7-0.9) combined with higher top_k/top_p was necessary to maintain articulation while allowing for physical jitter.\n\nHALL-OF-FAME SAMPLES:\n- s0820: Best overall balance of respiratory resets and blend.\n- s0796: Most intense respiratory effort (RESP 0.75) and pitch jitter.\n- s0772: Highest genuineness and stability."
+}
